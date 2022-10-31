@@ -12,7 +12,7 @@ import (
 var Conf *Config
 
 
-func InitViper() {
+func InitViper() bool {
 	ctx := context.Background()
 	viper.SetConfigType("yaml")
 	runEnv := os.Getenv("RUN_ENV")
@@ -27,12 +27,16 @@ func InitViper() {
 
 	if err := viper.ReadInConfig(); err != nil {
 		hlog.CtxErrorf(ctx, "[Viper] ReadInConfig failed, err: %v", err)
+		return false
 	}
 
 	if err := viper.Unmarshal(&Conf); err != nil {
 		hlog.CtxErrorf(ctx, "[Viper] Unmarshal failed, err: %v", err)
+		return false
 	}
 
 	hlog.CtxInfof(ctx, "[Viper] Conf.App: %#v", Conf.App)
 	hlog.CtxInfof(ctx, "[Viper] Conf.Cronjob: %#v", Conf.Cronjob)
+	hlog.CtxInfof(ctx, "[Viper] Conf.Redis: %#v", Conf.Redis)
+	return true
 }

@@ -8,12 +8,12 @@ import (
 
 func EncryptionTest() {
 	// AES-CBC
-	iv := []byte{0x19, 0x34, 0x57, 0x72, 0x90, 0xAB, 0xCD, 0xEF, 0x12, 0x64, 0x14, 0x78, 0x90, 0xAC, 0xAE, 0x45}
-	key := []byte("1111111111111111")
-	AesCbc := utils.CBCEncrypt([]byte("hello"), key, iv)
-	fmt.Println(AesCbc)
-	content := utils.CBCDecrypt(AesCbc, key, iv)
-	fmt.Println(string(content))
+	// iv := []byte{0x19, 0x34, 0x57, 0x72, 0x90, 0xAB, 0xCD, 0xEF, 0x12, 0x64, 0x14, 0x78, 0x90, 0xAC, 0xAE, 0x45}
+	// key := []byte("1111111111111111")
+	// AesCbc := utils.CBCEncrypt([]byte("hello"), key, iv)
+	// fmt.Println(AesCbc)
+	// content := utils.CBCDecrypt(AesCbc, key, iv)
+	// fmt.Println(string(content))
 	// BASE64
 	encode := utils.Base64Encoding([]byte("Hello"))
 	fmt.Println(encode)
