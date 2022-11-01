@@ -21,6 +21,7 @@ func main() {
 func Test() {
     k8s.Test()
     test.EncryptionTest()
+    test.TestToken()
 }
 
 func Init() {

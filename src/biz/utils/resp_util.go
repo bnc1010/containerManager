@@ -34,6 +34,6 @@ func ResponseError(c *app.RequestContext, msg string, err error) {
 func ResponseForbid(c *app.RequestContext, msg string) {
 	c.JSON(consts.StatusOK, utils.H{
 		"code":   10403,
-		"message": msg
+		"message": msg,
 	})
 }
