@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"fmt"
 	"time"
 	"errors"
 	"context"
@@ -12,7 +11,7 @@ import (
 )
 
 const (
-	connReadTimeout       time.Duration = 30 * time.Minute
+	tokenTimeout       time.Duration = 30 * time.Minute
 )
 
 type Token struct {
@@ -25,9 +24,12 @@ type Token struct {
 //判断token是否过期
 func (token *Token) IsValid() bool {
 	existTime := time.Since(token.CreateTime)
-	return existTime <= connReadTimeout
+	return existTime <= tokenTimeout
 }
-
+//
+// TokenStr :   bob&1667213184&root
+//				username&timestamp&role
+//
 func GenerateFromStr(tokenStr string) (*Token, error) {
 	defer func() {
 		err := recover()
@@ -35,15 +37,17 @@ func GenerateFromStr(tokenStr string) (*Token, error) {
 			hlog.CtxErrorf(context.Background(), "parameters error")
 		}
 	}()
+
 	infos := strings.Split(tokenStr, "&")
 	if len(infos) != 3 {
 		return nil, errors.New("parameters error")
 	}
-	fmt.Println(infos)
+	
 	timeUnix, error := strconv.ParseInt(infos[1],10,64)
 	if error != nil{
 		return nil, error
 	}
+
 	tm := time.Unix(timeUnix, 0)
 	if time.Now().Unix() - tm.Unix() >= 3600 {
 		return nil, &customError.TokenTimeoutError{infos[0], tm, infos[2]}

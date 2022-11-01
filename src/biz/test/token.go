@@ -11,12 +11,6 @@ import (
 
 
 func TestToken() {
-	// token := auth.Token{UserName:"bnc", CreateTime:time.Now()}
-	// fmt.Println(token)
-	// time.Sleep(time.Duration(2)*time.Second)
-	// fmt.Println(token.IsValid())
-	//1667213184
-	// fmt.Println(time.Now().Unix())
 	token, error := auth.GenerateFromStr("bnc&1667213184&root")  
 	if error == nil {
 		fmt.Println(token)
@@ -32,4 +26,5 @@ func TestToken() {
 	fmt.Println(bs64)
 }
 
+//curl -d '{"a":"test"}' -H "Content-Type:application/json" -H "AUTH_TOKEN:grFsvAdxNlb6YdY1e5nz1o3gQ89tmrFzVAotNW00ZD8="  -X POST http://127.0.0.1:8888/postping
 //grFsvAdxNlb6YdY1e5nz1o3gQ89tmrFzVAotNW00ZD8=

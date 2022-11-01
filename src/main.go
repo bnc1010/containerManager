@@ -7,23 +7,29 @@ import (
     godotenv "github.com/bnc1010/containerManager/biz/pkg/godotenv"
     k8s "github.com/bnc1010/containerManager/biz/pkg/k8s"
     "github.com/cloudwego/hertz/pkg/app/server"
-    test "github.com/bnc1010/containerManager/biz/test"
+    // test "github.com/bnc1010/containerManager/biz/test"
     middlewares "github.com/bnc1010/containerManager/biz/middlewares"
 )
 
 func main() {
 	Init()
-    // Test()
+    Test()
     
-    ServerStart()
+    // ServerStart()
 }
 
+//
+// 自定义测试项
+//
 func Test() {
     k8s.Test()
-    test.EncryptionTest()
-    test.TestToken()
+    // test.EncryptionTest()
+    // test.TestToken()
 }
 
+//
+// 配置初始化
+//
 func Init() {
     initSignal := true
     initSignal = initSignal && godotenv.InitGodotenv()
@@ -38,14 +44,25 @@ func Init() {
     }
 }
 
+//
+// 启动服务
+//
 func ServerStart() {
     h := server.Default(
         server.WithHostPorts(viper.Conf.App.HostPorts),
 		server.WithMaxRequestBodySize(viper.Conf.App.MaxRequestBodySize),
 		server.WithExitWaitTime(10),
     )
+    
+//
+// 添加中间件
+//
     h.Use(middlewares.IpChecker())
     h.Use(middlewares.AuthChecker())
+
+//
+// 注册路由并启动服务
+//
 	register(h)
 	h.Spin()
 }

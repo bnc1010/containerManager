@@ -8,13 +8,37 @@ import (
 	"fmt"
 )
 
-func Test()  {
-	ctx := context.Background()
-	pods, err := (*Client).CoreV1().Pods("default").List(ctx, metav1.ListOptions{})
+
+func testPod(ctx context.Context) {
+	pods, err := Client.CoreV1().Pods("default").List(ctx, metav1.ListOptions{})
 	if err != nil {
 		hlog.CtxErrorf(ctx, "[K8S] test error, err: %v", err)
 	}
 	for _,v := range  pods.Items {
-        fmt.Println("命名空间是：%v\n pod名字：%v",v.Namespace,v.Name)
+        fmt.Printf("命名空间是：%v pod名字：%v\n",v.Namespace,v.Name)
     }
+}
+
+func testNode(ctx context.Context) {
+	nodeList,err := GetNodeList()
+	for err != nil{
+		hlog.CtxErrorf(ctx, "[K8S] test error, err: %v", err)
+	}
+	//fmt.Printf("%+v",nodeList)
+	for _,nodeInfo := range nodeList.Items{
+		fmt.Printf("node 的名字为：|%s|\n",nodeInfo.Name)
+	}
+
+	nodeInfo, err := GetNode("cn-shanghai.10.24.0.129")
+	if err == nil {
+		fmt.Printf("%+v\n", nodeInfo.Status.Allocatable.Memory().String())
+	} else {
+		fmt.Printf("%s\n", err)
+	}
+}
+
+func Test()  {
+	ctx := context.Background()
+	testPod(ctx)
+	testNode(ctx)
 }
