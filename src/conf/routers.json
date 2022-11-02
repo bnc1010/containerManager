@@ -1,0 +1,12 @@
+{
+    "root": [
+        "^/.*"
+    ],
+    "admin": [
+        "^/admin.*",
+        "^/common.*"
+    ],
+    "common": [
+        "^/common.*"
+    ]
+}

@@ -4,6 +4,7 @@ import (
 	"os"
 	"fmt"
 	"errors"
+	"regexp"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/bnc1010/containerManager/biz/utils"
@@ -64,7 +65,7 @@ func checkToken(c *app.RequestContext) (token * auth.Token, errorMsg string) {
 	AUTH_TOKEN := string(c.GetHeader(viper.Conf.App.TokenHeader))
 	content := DecodeToken(AUTH_TOKEN)
 	if content == nil {
-		return nil, fmt.Sprintf("Illegal token")
+		return nil, fmt.Sprintf("Illegal token!")
 	}
 	token, error := auth.GenerateFromStr(string(content))
 	switch error.(type) {
@@ -73,31 +74,69 @@ func checkToken(c *app.RequestContext) (token * auth.Token, errorMsg string) {
 		case * customError.TokenTimeoutError:
 			return nil, fmt.Sprintf("%s", error)
 		default:
-			return nil, fmt.Sprintf("Illegal token")
+			return nil, fmt.Sprintf("Illegal token!")
 	}
-	return nil, fmt.Sprintf("Illegal token")
+	return nil, fmt.Sprintf("Illegal token!")
+}
+
+func checkRouter(token * auth.Token, c *app.RequestContext) (bool, string) {
+	var routers []string
+		switch token.Role {
+			case "root":
+				routers = auth.AuthRouters.Root
+			case "admin":
+				routers = auth.AuthRouters.Admin
+			case "common":
+				routers = auth.AuthRouters.Common
+			default:
+				routers = nil
+		}
+		if routers == nil {
+			return false, "Error Role!"
+		}
+
+		for _, router := range routers {
+			sta, err := regexp.MatchString(router, c.FullPath())
+			if err == nil && sta {
+				return true, ""
+			}
+		}
+		return false, "No Permission!"
 }
 
 //进入handler之前预鉴定
 func AuthChecker() app.HandlerFunc {
 	return func(ctx context.Context, c *app.RequestContext) {
-	  //
-	  // 检查token是否有效:能否解密&是否过期
-	  //
-	  token, errorMsg := checkToken(c)
-	  if token == nil {
-		utils.ResponseForbid(c, errorMsg)
-		c.AbortWithStatus(403)
-		return
-	  }
+		//
+		// 检查地址是否存在
+		//
+		if c.FullPath() == "" {
+			utils.ResponseNotFound(c)
+			c.AbortWithStatus(404)
+			return
+		}
+		
+		//
+		// 检查token是否有效:能否解密&是否过期
+		//
+		token, errorMsg := checkToken(c)
+		if token == nil {
+			utils.ResponseForbid(c, errorMsg)
+			c.AbortWithStatus(403)
+			return
+		}
 
-	  //
-	  // 检查token是否对访问的地址拥有权限
-	  //
-	  fmt.Println(c.FullPath())
-	  fmt.Println(string(c.URI().Path()))
-	  
-	  c.Next(ctx)
-	  // post-handle
+		//
+		// 检查token是否对访问的地址拥有权限
+		//
+		sta, errorMsg := checkRouter(token, c)
+		if !sta {
+			utils.ResponseForbid(c, errorMsg)
+			c.AbortWithStatus(403)
+			return
+		}
+		
+		c.Next(ctx)
+		// post-handle
 	}
   }

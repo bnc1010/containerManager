@@ -11,5 +11,8 @@ import (
 func customizedRegister(r *server.Hertz) {
 	r.GET("/ping", handler.Ping)
 	r.POST("/postping", handler.PostTest)
+	r.POST("/common/postping", handler.PostTest)
+	r.POST("/admin/postping", handler.PostTest)
+	r.POST("/root/postping", handler.PostTest)
 	// your code ...
 }

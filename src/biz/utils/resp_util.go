@@ -37,3 +37,11 @@ func ResponseForbid(c *app.RequestContext, msg string) {
 		"message": msg,
 	})
 }
+
+// ResponseNotFound 404响应体
+func ResponseNotFound(c *app.RequestContext) {
+	c.JSON(consts.StatusOK, utils.H{
+		"code":   10404,
+		"message": "Not Found",
+	})
+}
