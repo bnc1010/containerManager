@@ -1,0 +1,21 @@
+# 请把k8s配置文件放在当前目录下，命名为k8sconfig
+
+apiVersion: v1
+clusters:
+- cluster:
+    server: xxx
+    certificate-authority-data: xxx
+    name: kubernetes
+contexts:
+- context:
+    cluster: xxx
+    user: xxx
+  name: xxx
+current-context: xxx
+kind: xxx
+preferences: {}
+users:
+- name: xxx
+  user:
+    client-certificate-data: xxx
+        client-key-data: xxx

@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"os"
 	"time"
 	"errors"
 	"context"
@@ -43,15 +44,23 @@ func GenerateFromStr(tokenStr string) (*Token, error) {
 		return nil, errors.New("parameters error")
 	}
 	
-	timeUnix, error := strconv.ParseInt(infos[1],10,64)
-	if error != nil{
-		return nil, error
+	timeUnix, err := strconv.ParseInt(infos[1],10,64)
+	if err != nil{
+		return nil, err
 	}
 
 	tm := time.Unix(timeUnix, 0)
-	if time.Now().Unix() - tm.Unix() >= 3600 {
-		return nil, &customError.TokenTimeoutError{infos[0], tm, infos[2]}
+	
+	maxTime, err := strconv.ParseInt(os.Getenv("TOKEN_TIMEOUT"),10,64)
+	if err != nil {
+		maxTime = 3600
 	}
+	if maxTime != -1 {
+		if time.Now().Unix() - tm.Unix() >= 3600 {
+			return nil, &customError.TokenTimeoutError{infos[0], tm, infos[2]}
+		}
+	}
+	
 	token := &Token{infos[0], tm, infos[2]}
 	return token, nil
 }
