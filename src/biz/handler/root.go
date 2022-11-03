@@ -4,9 +4,15 @@ import (
 	"fmt"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"github.com/cloudwego/hertz/pkg/common/utils"
+	"github.com/bnc1010/containerManager/biz/pkg/k8s"
+	resp_utils "github.com/bnc1010/containerManager/biz/utils"
 )
+
+type Namespace struct {
+	Name string `json:"name,required"`
+}
 
 func RootPostTest(ctx context.Context, c *app.RequestContext) {
 	type Test struct {
@@ -24,4 +30,71 @@ func RootPostTest(ctx context.Context, c *app.RequestContext) {
 	c.JSON(200, utils.H{
 		"message": "pong",
 	})
+}
+
+func RootGetNamespaceList(ctx context.Context, c *app.RequestContext) {
+	namespaces, err := k8s.GetNamespaceList()
+	if err != nil {
+		resp_utils.ResponseError(c, "Get Namespaces Error", err)
+		return
+	}
+	resp_utils.ResponseOK(c, "success", namespaces)
+}
+
+func RootGetNamespace(ctx context.Context, c *app.RequestContext) {
+	var req Namespace
+    err := c.BindAndValidate(&req)
+	
+	if err == nil {
+		fmt.Println(req)
+	} else{
+		hlog.CtxErrorf(ctx, "[PostTest] Unmarshal failed, err: %v", err)
+		resp_utils.ResponseErrorParameter(c)
+		return
+	}
+	namespaceInfo, err := k8s.GetNamespace(req.Name)
+	if err != nil {
+		resp_utils.ResponseError(c, "Get Namespace Error", err)
+		return
+	}
+	resp_utils.ResponseOK(c, "success", namespaceInfo)
+}
+
+func RootCreateNamespace(ctx context.Context, c *app.RequestContext) {
+	var req Namespace
+    err := c.BindAndValidate(&req)
+	
+	if err == nil {
+		fmt.Println(req)
+	} else{
+		hlog.CtxErrorf(ctx, "[PostTest] Unmarshal failed, err: %v", err)
+		resp_utils.ResponseErrorParameter(c)
+		return
+	}
+	namespaceInfo, err := k8s.CreateNamespace(req.Name)
+	if err != nil {
+		resp_utils.ResponseError(c, "Create Namespace Error", err)
+		return
+	}
+	resp_utils.ResponseOK(c, "success", namespaceInfo)
+}
+
+
+func RootDeleteNamespace(ctx context.Context, c *app.RequestContext) {
+	var req Namespace
+    err := c.BindAndValidate(&req)
+	
+	if err == nil {
+		fmt.Println(req)
+	} else{
+		hlog.CtxErrorf(ctx, "[PostTest] Unmarshal failed, err: %v", err)
+		resp_utils.ResponseErrorParameter(c)
+		return
+	}
+	err = k8s.DeleteNamespace(req.Name)
+	if err != nil {
+		resp_utils.ResponseError(c, "Delete Namespace Error", err)
+		return
+	}
+	resp_utils.ResponseOK(c, "success", "")
 }

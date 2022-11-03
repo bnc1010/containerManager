@@ -45,3 +45,12 @@ func ResponseNotFound(c *app.RequestContext) {
 		"message": "Not Found",
 	})
 }
+
+
+// ResponseNotFound 404响应体
+func ResponseErrorParameter(c *app.RequestContext) {
+	c.JSON(consts.StatusOK, utils.H{
+		"code":   10400,
+		"message": "Error Parameter",
+	})
+}

@@ -11,8 +11,19 @@ import (
 func customizedRegister(r *server.Hertz) {
 	r.GET("/ping", handler.Ping)
 	r.POST("/postping", handler.PostTest)
+
+
+
 	r.POST("/common/postping", handler.CommonPostTest)
+
+
 	r.POST("/admin/postping", handler.AdminPostTest)
+	
+
+	// root Namespace
 	r.POST("/root/postping", handler.RootPostTest)
-	// your code ...
+	r.POST("/root/getNamespace", handler.RootGetNamespace)
+	r.POST("/root/listNamespaces", handler.RootGetNamespaceList)
+	r.POST("/root/createNamespace", handler.RootCreateNamespace)
+	r.POST("/root/deleteNamespace", handler.RootDeleteNamespace)
 }
