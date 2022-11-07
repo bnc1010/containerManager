@@ -10,9 +10,7 @@ import (
 	resp_utils "github.com/bnc1010/containerManager/biz/utils"
 )
 
-type Namespace struct {
-	Name string `json:"name,required"`
-}
+
 
 func RootPostTest(ctx context.Context, c *app.RequestContext) {
 	type Test struct {
@@ -33,21 +31,19 @@ func RootPostTest(ctx context.Context, c *app.RequestContext) {
 }
 
 func RootGetNamespaceList(ctx context.Context, c *app.RequestContext) {
-	namespaces, err := k8s.GetNamespaceList()
+	namespaceList, err := k8s.GetNamespaceList()
 	if err != nil {
 		resp_utils.ResponseError(c, "Get Namespaces Error", err)
 		return
 	}
-	resp_utils.ResponseOK(c, "success", namespaces)
+	resp_utils.ResponseOK(c, "success", namespaceList)
 }
 
 func RootGetNamespace(ctx context.Context, c *app.RequestContext) {
 	var req Namespace
     err := c.BindAndValidate(&req)
 	
-	if err == nil {
-		fmt.Println(req)
-	} else{
+	if err != nil {
 		hlog.CtxErrorf(ctx, "[PostTest] Unmarshal failed, err: %v", err)
 		resp_utils.ResponseErrorParameter(c)
 		return
@@ -64,9 +60,7 @@ func RootCreateNamespace(ctx context.Context, c *app.RequestContext) {
 	var req Namespace
     err := c.BindAndValidate(&req)
 	
-	if err == nil {
-		fmt.Println(req)
-	} else{
+	if err != nil {
 		hlog.CtxErrorf(ctx, "[PostTest] Unmarshal failed, err: %v", err)
 		resp_utils.ResponseErrorParameter(c)
 		return
@@ -84,9 +78,7 @@ func RootDeleteNamespace(ctx context.Context, c *app.RequestContext) {
 	var req Namespace
     err := c.BindAndValidate(&req)
 	
-	if err == nil {
-		fmt.Println(req)
-	} else{
+	if err != nil {
 		hlog.CtxErrorf(ctx, "[PostTest] Unmarshal failed, err: %v", err)
 		resp_utils.ResponseErrorParameter(c)
 		return
@@ -97,4 +89,41 @@ func RootDeleteNamespace(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	resp_utils.ResponseOK(c, "success", "")
+}
+
+
+
+func RootGetNodeList(ctx context.Context, c *app.RequestContext) {
+	nodeList, err := k8s.GetNodeList()
+	if err != nil {
+		resp_utils.ResponseError(c, "Get NodeList Error", err)
+		return
+	}
+	resp_utils.ResponseOK(c, "success", nodeList)
+}
+
+
+func RootGetNode(ctx context.Context, c *app.RequestContext) {
+	var req Node 
+	err := c.BindAndValidate(&req)
+	if err != nil {
+		hlog.CtxErrorf(ctx, "[PostTest] Unmarshal failed, err: %v", err)
+		resp_utils.ResponseErrorParameter(c)
+		return
+	}
+	nodeInfo, err := k8s.GetNode(req.Name)
+	if err != nil {
+		resp_utils.ResponseError(c, "Get Node Error", err)
+		return
+	}
+	resp_utils.ResponseOK(c, "success", nodeInfo)
+}
+
+func RootNodesMetrics(ctx context.Context, c *app.RequestContext) {
+	data, err := k8s.NodesMetrics()
+	if err != nil {
+		resp_utils.ResponseError(c, "Get Nodes Metrics", err)
+		return
+	}
+	resp_utils.ResponseOK(c, "success", data)
 }
