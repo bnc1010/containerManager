@@ -2,6 +2,7 @@ package k8s
 
 
 import (
+    "fmt"
 	"time"
 	"context"
 	"encoding/json"
@@ -34,6 +35,14 @@ type PodMetricsList struct {
     } `json:"items"`
 }
 
+type PodUsage struct {
+    Metrics [] struct {
+        Timestamp  time.Time    `json:"timestamp"`
+        Value      int64       `json:"value"`
+    }                           `json:"metrics"`
+    LatestTimestamp time.Time   `json:"latestTimestamp"`
+}
+
 func GetPodList(namespaceName string) (podList *corev1.PodList, err error) {
 	podList, err = Client.CoreV1().Pods(namespaceName).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
@@ -57,4 +66,26 @@ func PodsMetrics() (nodes *PodMetricsList, err error) {
 	}
 	json.Unmarshal(data, &nodes)
 	return nodes, nil
+}
+
+func PodHeapsterMemory(namespaceName string,podName string)  {
+    var path = "/api/v1/namespaces/kube-system/services/heapster/proxy/api/v1/model/namespaces/" + namespaceName + "/pods/" + podName + "/metrics/memory/usage"
+    podHeapster, err := Client.RESTClient().Get().AbsPath(path).DoRaw(context.TODO())
+    if err != nil {
+        fmt.Println(err)
+	}
+    var pod PodUsage
+    json.Unmarshal(podHeapster, &pod)
+    fmt.Println(pod)
+}
+
+func PodHeapsterCpu(namespaceName string,podName string)  {
+    var path = "/api/v1/namespaces/kube-system/services/heapster/proxy/api/v1/model/namespaces/" + namespaceName + "/pods/" + podName + "/metrics/cpu/usage_rate"
+    podHeapster, err := Client.RESTClient().Get().AbsPath(path).DoRaw(context.TODO())
+    if err != nil {
+        fmt.Println(err)
+	}
+    var pod PodUsage
+    json.Unmarshal(podHeapster, &pod)
+    fmt.Println(pod)
 }
