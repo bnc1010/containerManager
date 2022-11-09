@@ -14,9 +14,9 @@ import (
 
 func main() {
 	Init()
-    Test()
+    // Test()
     
-    // ServerStart()
+    ServerStart()
 }
 
 //

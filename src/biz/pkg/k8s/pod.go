@@ -2,7 +2,6 @@ package k8s
 
 
 import (
-    "fmt"
 	"time"
 	"context"
 	"encoding/json"
@@ -68,24 +67,22 @@ func PodsMetrics() (nodes *PodMetricsList, err error) {
 	return nodes, nil
 }
 
-func PodHeapsterMemory(namespaceName string,podName string)  {
+func PodHeapsterMemory(namespaceName string,podName string)  (podUsage * PodUsage, err error)  {
     var path = "/api/v1/namespaces/kube-system/services/heapster/proxy/api/v1/model/namespaces/" + namespaceName + "/pods/" + podName + "/metrics/memory/usage"
     podHeapster, err := Client.RESTClient().Get().AbsPath(path).DoRaw(context.TODO())
     if err != nil {
-        fmt.Println(err)
+        return nil, err
 	}
-    var pod PodUsage
-    json.Unmarshal(podHeapster, &pod)
-    fmt.Println(pod)
+    json.Unmarshal(podHeapster, &podUsage)
+    return podUsage, nil
 }
 
-func PodHeapsterCpu(namespaceName string,podName string)  {
+func PodHeapsterCpu(namespaceName string,podName string) (podUsage * PodUsage, err error) {
     var path = "/api/v1/namespaces/kube-system/services/heapster/proxy/api/v1/model/namespaces/" + namespaceName + "/pods/" + podName + "/metrics/cpu/usage_rate"
     podHeapster, err := Client.RESTClient().Get().AbsPath(path).DoRaw(context.TODO())
     if err != nil {
-        fmt.Println(err)
+        return nil, err
 	}
-    var pod PodUsage
-    json.Unmarshal(podHeapster, &pod)
-    fmt.Println(pod)
+    json.Unmarshal(podHeapster, &podUsage)
+    return podUsage, nil
 }

@@ -15,6 +15,7 @@ func customizedRegister(r *server.Hertz) {
 
 	// common
 	r.POST("/common/postping", handler.CommonPostTest)
+	
 
 	
 	// admin
@@ -23,9 +24,11 @@ func customizedRegister(r *server.Hertz) {
 	r.POST("/admin/getPod", handler.AdminGetPod)
 	r.POST("/admin/listPods", handler.AdminGetPodList)
 	r.POST("/admin/podsMetrics", handler.AdminPodsMetrics)
+	r.POST("/admin/podMemory", handler.AdminPodHeapsterMemory)
+	r.POST("/admin/podCpu", handler.AdminPodHeapsterCpu)
 	
 	
-
+	
 	// root 
 	r.POST("/root/postping", handler.RootPostTest)
 	// Namespace

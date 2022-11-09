@@ -70,3 +70,35 @@ func AdminPodsMetrics(ctx context.Context, c *app.RequestContext) {
 	}
 	resp_utils.ResponseOK(c, "success", data)
 }
+
+func AdminPodHeapsterMemory(ctx context.Context, c *app.RequestContext) {
+	var req Pod
+	err := c.BindAndValidate(&req)
+	if err != nil {
+		hlog.CtxErrorf(ctx, "[PostTest] Unmarshal failed, err: %v", err)
+		resp_utils.ResponseErrorParameter(c)
+		return
+	}
+	podUsage, err := k8s.PodHeapsterMemory(req.Namespace, req.Name)
+	if err != nil {
+		resp_utils.ResponseError(c, "Get Pod Memory Info Error", err)
+		return
+	}
+	resp_utils.ResponseOK(c, "success", podUsage)
+}
+
+func AdminPodHeapsterCpu(ctx context.Context, c *app.RequestContext) {
+	var req Pod
+	err := c.BindAndValidate(&req)
+	if err != nil {
+		hlog.CtxErrorf(ctx, "[PostTest] Unmarshal failed, err: %v", err)
+		resp_utils.ResponseErrorParameter(c)
+		return
+	}
+	podUsage, err := k8s.PodHeapsterCpu(req.Namespace, req.Name)
+	if err != nil {
+		resp_utils.ResponseError(c, "Get Pod Cpu Info Error", err)
+		return
+	}
+	resp_utils.ResponseOK(c, "success", podUsage)
+}
