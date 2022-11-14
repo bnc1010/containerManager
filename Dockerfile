@@ -11,3 +11,8 @@ RUN go env -w GOPROXY=https://goproxy.cn \
 
 
 EXPOSE 8888
+
+###########--For deploy--############
+#COPY entrypoint.sh /entrypoint.sh
+#ENTRYPOINT [ "/entrypoint.sh" ]
+#####################################

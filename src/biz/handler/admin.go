@@ -42,7 +42,7 @@ func AdminGetPodList(ctx context.Context, c *app.RequestContext) {
 		resp_utils.ResponseError(c, "Get PodList Error", err)
 		return
 	}
-	resp_utils.ResponseOK(c, "success", podList)
+	resp_utils.ResponseOK(c, responseMsg.Success, podList)
 }
 
 
@@ -59,7 +59,7 @@ func AdminGetPod(ctx context.Context, c *app.RequestContext) {
 		resp_utils.ResponseError(c, "Get Pod Error", err)
 		return
 	}
-	resp_utils.ResponseOK(c, "success", podInfo)
+	resp_utils.ResponseOK(c, responseMsg.Success, podInfo)
 }
 
 func AdminPodsMetrics(ctx context.Context, c *app.RequestContext) {
@@ -68,7 +68,7 @@ func AdminPodsMetrics(ctx context.Context, c *app.RequestContext) {
 		resp_utils.ResponseError(c, "Get Pods Metrics", err)
 		return
 	}
-	resp_utils.ResponseOK(c, "success", data)
+	resp_utils.ResponseOK(c, responseMsg.Success, data)
 }
 
 func AdminPodHeapsterMemory(ctx context.Context, c *app.RequestContext) {
@@ -84,7 +84,7 @@ func AdminPodHeapsterMemory(ctx context.Context, c *app.RequestContext) {
 		resp_utils.ResponseError(c, "Get Pod Memory Info Error", err)
 		return
 	}
-	resp_utils.ResponseOK(c, "success", podUsage)
+	resp_utils.ResponseOK(c, responseMsg.Success, podUsage)
 }
 
 func AdminPodHeapsterCpu(ctx context.Context, c *app.RequestContext) {
@@ -100,5 +100,5 @@ func AdminPodHeapsterCpu(ctx context.Context, c *app.RequestContext) {
 		resp_utils.ResponseError(c, "Get Pod Cpu Info Error", err)
 		return
 	}
-	resp_utils.ResponseOK(c, "success", podUsage)
+	resp_utils.ResponseOK(c, responseMsg.Success, podUsage)
 }

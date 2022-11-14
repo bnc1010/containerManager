@@ -8,6 +8,6 @@ Cronjob:
   TokenMinute: 55
 
 Redis:
-  Addr: "172.25.192.1:6379"
+  Addr: "redis:6379"           # 新建一个docker网络，非则不能以容器命访问
   Password: ""
   Db: 1

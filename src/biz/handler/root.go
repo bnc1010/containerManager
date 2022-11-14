@@ -36,7 +36,7 @@ func RootGetNamespaceList(ctx context.Context, c *app.RequestContext) {
 		resp_utils.ResponseError(c, "Get Namespaces Error", err)
 		return
 	}
-	resp_utils.ResponseOK(c, "success", namespaceList)
+	resp_utils.ResponseOK(c, responseMsg.Success, namespaceList)
 }
 
 func RootGetNamespace(ctx context.Context, c *app.RequestContext) {
@@ -53,7 +53,7 @@ func RootGetNamespace(ctx context.Context, c *app.RequestContext) {
 		resp_utils.ResponseError(c, "Get Namespace Error", err)
 		return
 	}
-	resp_utils.ResponseOK(c, "success", namespaceInfo)
+	resp_utils.ResponseOK(c, responseMsg.Success, namespaceInfo)
 }
 
 func RootCreateNamespace(ctx context.Context, c *app.RequestContext) {
@@ -70,7 +70,7 @@ func RootCreateNamespace(ctx context.Context, c *app.RequestContext) {
 		resp_utils.ResponseError(c, "Create Namespace Error", err)
 		return
 	}
-	resp_utils.ResponseOK(c, "success", namespaceInfo)
+	resp_utils.ResponseOK(c, responseMsg.Success, namespaceInfo)
 }
 
 
@@ -88,7 +88,7 @@ func RootDeleteNamespace(ctx context.Context, c *app.RequestContext) {
 		resp_utils.ResponseError(c, "Delete Namespace Error", err)
 		return
 	}
-	resp_utils.ResponseOK(c, "success", "")
+	resp_utils.ResponseOK(c, responseMsg.Success, "")
 }
 
 
@@ -99,7 +99,7 @@ func RootGetNodeList(ctx context.Context, c *app.RequestContext) {
 		resp_utils.ResponseError(c, "Get NodeList Error", err)
 		return
 	}
-	resp_utils.ResponseOK(c, "success", nodeList)
+	resp_utils.ResponseOK(c, responseMsg.Success, nodeList)
 }
 
 
@@ -116,7 +116,7 @@ func RootGetNode(ctx context.Context, c *app.RequestContext) {
 		resp_utils.ResponseError(c, "Get Node Error", err)
 		return
 	}
-	resp_utils.ResponseOK(c, "success", nodeInfo)
+	resp_utils.ResponseOK(c, responseMsg.Success, nodeInfo)
 }
 
 func RootNodesMetrics(ctx context.Context, c *app.RequestContext) {
@@ -125,5 +125,5 @@ func RootNodesMetrics(ctx context.Context, c *app.RequestContext) {
 		resp_utils.ResponseError(c, "Get Nodes Metrics", err)
 		return
 	}
-	resp_utils.ResponseOK(c, "success", data)
+	resp_utils.ResponseOK(c, responseMsg.Success, data)
 }
