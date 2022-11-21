@@ -11,6 +11,7 @@ import (
     test "github.com/bnc1010/containerManager/biz/test"
     middlewares "github.com/bnc1010/containerManager/biz/middlewares"
     auth "github.com/bnc1010/containerManager/biz/pkg/auth"
+    postgres "github.com/bnc1010/containerManager/biz/pkg/postgres"
 )
 
 func main() {
@@ -44,6 +45,7 @@ func Init() {
     initSignal = initSignal && k8s.InitK8s()
     initSignal = initSignal && middlewares.InitChecker()
     initSignal = initSignal && auth.InitAuthRouters()
+    initSignal = initSignal && postgres.InitPostgres()
     if ! initSignal {
         os.Exit(101)
     }

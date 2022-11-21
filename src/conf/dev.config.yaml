@@ -11,3 +11,10 @@ Redis:
   Addr: "redis:6379"           # 新建一个docker网络，非则不能以容器命访问
   Password: ""
   Db: 1
+
+Postgres:
+  Host: postgres
+  Port: 5432
+  User: root
+  Password: 123456
+  Db: test

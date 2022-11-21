@@ -8,6 +8,13 @@ services:
     networks:
       - snet
   
+  postgres:
+    image: postgres:latest
+    ports:
+      - "5421"
+    networks:
+      - snet
+
   app:
     build: .
     ports:

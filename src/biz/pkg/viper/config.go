@@ -1,9 +1,10 @@
 package viper
 
 type Config struct {
-	App     *App     		   `yaml:"App"`
-	Cronjob *Cronjob 		   `yaml:"Cronjob"`
-	Redis   *Redis   		   `yaml:"Redis"`
+	App     	*App     		   `yaml:"App"`
+	Cronjob 	*Cronjob 		   `yaml:"Cronjob"`
+	Redis   	*Redis   		   `yaml:"Redis"`
+	Postgres	*Postgres		   `yaml:"Postgres"`
 }
 
 type App struct {
@@ -21,4 +22,12 @@ type Redis struct {
 	Addr 			   string  `yaml:"Addr"`
 	Password	   	   string  `yaml:"Password"`
 	Db				   int     `yaml:"Db"`
+}
+
+type Postgres struct {
+	Host 			   string  `yaml:"Host"`
+	Port 			   int     `yaml:"Port"`
+	User			   string  `yaml:"User"`
+	Password	   	   string  `yaml:"Password"`
+	Db				   string  `yaml:"Db"`
 }

@@ -38,5 +38,6 @@ func InitViper() bool {
 	hlog.CtxInfof(ctx, "[Viper] Conf.App: %#v", Conf.App)
 	hlog.CtxInfof(ctx, "[Viper] Conf.Cronjob: %#v", Conf.Cronjob)
 	hlog.CtxInfof(ctx, "[Viper] Conf.Redis: %#v", Conf.Redis)
+	hlog.CtxInfof(ctx, "[Viper] Conf.Postgres: %#v", Conf.Postgres)
 	return true
 }
