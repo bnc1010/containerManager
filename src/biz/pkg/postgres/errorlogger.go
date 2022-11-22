@@ -5,7 +5,7 @@ import (
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 )
 
-var ctx context.Background()
+var ctx = context.Background()
 
 func imageErrorLoger(err error) {
 	hlog.CtxFatalf(ctx, "[Postgres - Image] ", err)

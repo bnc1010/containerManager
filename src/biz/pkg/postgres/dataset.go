@@ -15,7 +15,7 @@ func DatasetInfo(datasetId string) (*Dataset, error) {
 			return nil, err
 		}
 	}
-	return &dataset, nil
+	return dataset, nil
 }
 
 func DatasetAdd(dataset * Dataset) bool {

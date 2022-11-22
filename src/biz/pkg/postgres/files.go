@@ -15,7 +15,7 @@ func FilesInfo(filesId string) (*Files, error) {
 			return nil, err
 		}
 	}
-	return &files, nil
+	return files, nil
 }
 
 func FilesAdd(files *Files) bool {

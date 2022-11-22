@@ -9,13 +9,13 @@ func ProjectInfo(projectId string)	(*Project, error) {
 	}
 	var project * Project
 	for rows.Next() {
-		err := rows.Scan(&project.Id, &project.Name, &project.Describe, &project.Owner, &project.CreateTime, &project.LastOpenTime, &project.Path, &project.IsPublic, &project.Files, &project.Datasets, &project.Images, &project.ForkFrom, &project.K8sNodeTags, &project.Resources)
+		err := rows.Scan(&project.Id, &project.Name, &project.Describe, &project.Owner, &project.CreateTime, &project.LastOpenTime, &project.IsPublic, &project.Files, &project.Datasets, &project.Images, &project.ForkFrom, &project.K8sNodeTags, &project.Resources)
 		if err != nil {
 			projectErrorLoger(err)
 			return nil, err
 		}
 	}
-	return &project, nil
+	return project, nil
 }
 
 func ProjectAdd(project *Project) bool {

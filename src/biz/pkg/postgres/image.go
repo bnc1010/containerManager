@@ -15,7 +15,7 @@ func ImageInfo(imageId string) (*Image, error) {
 			return nil, err
 		}
 	}
-	return &image, nil
+	return image, nil
 }
 
 func ImageAdd(image *Image) bool {
@@ -48,7 +48,7 @@ func ImageDel(imageId string) bool {
 	return true
 }
 
-func ImageUpdate(image *Image) {
+func ImageUpdate(image *Image) bool {
 	stmt, err := Client.Prepare("update tb_image set name=$1,describe=$2,pullname=$3,usegpu=$4,updatetime=$5 where id=$6")
 	defer stmt.Close()
 	if err != nil {
