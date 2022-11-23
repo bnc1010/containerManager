@@ -1,5 +1,9 @@
 package postgres
 
+import (
+	"github.com/bnc1010/containerManager/biz/utils"
+)
+
 func ProjectInfo(projectId string)	(*Project, error) {
 	rows, err:= Client.Query("select * from tb_project where id=$1", projectId)
 	defer rows.Close()
@@ -25,7 +29,12 @@ func ProjectAdd(project *Project) bool {
 		projectErrorLoger(err)
 		return false
 	}
-	_, err = stmt.Exec(project.Id, project.Name, project.Describe, project.Owner, project.CreateTime, project.LastOpenTime, project.IsPublic, project.Files, project.Datasets, project.Images, project.ForkFrom, project.K8sNodeTags, project.Resources)
+	files_json, _ := utils.Map2Bytes(project.Files)
+	datasets_json, _ := utils.Map2Bytes(project.Datasets)
+	k8snodetags_json, _ := utils.Map2Bytes(project.K8sNodeTags)
+	resources_json, _ := utils.Map2Bytes(project.Resources)
+	images_json, _ := utils.Array2Bytes(project.Images)
+	_, err = stmt.Exec(project.Id, project.Name, project.Describe, project.Owner, project.CreateTime, project.LastOpenTime, project.IsPublic, files_json, datasets_json, images_json, project.ForkFrom, k8snodetags_json, resources_json)
 	if err != nil {
 		projectErrorLoger(err)
 		return false

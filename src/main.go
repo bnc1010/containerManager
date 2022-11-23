@@ -16,19 +16,21 @@ import (
 
 func main() {
 	Init()
-    // Test()
+    Test()
     
-    ServerStart()
+    // ServerStart()
 }
 
 //
 // 自定义测试项
 //
 func Test() {
-    k8s.Test()
+    // k8s.Test()
     // test.EncryptionTest()
-    test.TestToken()
-    test.TestK8s()
+    // test.TestToken()
+    // test.TestK8s()
+    test.TestPostgres()
+    // test.TestJson()
 }
 
 //

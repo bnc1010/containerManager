@@ -11,7 +11,7 @@ services:
   postgres:
     image: postgres:latest
     ports:
-      - "5421"
+      - "5432"
     networks:
       - snet
 

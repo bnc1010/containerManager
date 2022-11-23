@@ -19,7 +19,7 @@ func FilesInfo(filesId string) (*Files, error) {
 }
 
 func FilesAdd(files *Files) bool {
-	stmt, err := Client.Prepare("insert into tb_files(id,name,creator,path,createtime,updatetime,size) values($1,$2,$3,$4,$5,$6,$7,$8)")
+	stmt, err := Client.Prepare("insert into tb_files(id,name,creator,path,createtime,updatetime,size) values($1,$2,$3,$4,$5,$6,$7)")
 	defer stmt.Close()
 	if err != nil {
 		filesErrorLoger(err)

@@ -4,7 +4,6 @@ import (
 	"time"
 )
 
-
 type Dataset struct {
 	Id				string
 	Name			string
@@ -25,15 +24,15 @@ type Project struct {
 	CreateTime		time.Time
 	LastOpenTime	time.Time
 	IsPublic		bool
-	Files			map[string]string
-	Datasets		map[string]string
-	Images			[] string
+	Files			map[string]interface{}
+	Datasets		map[string]interface{}
+	Images			[]interface{}
 	ForkFrom		string
 
 
 	// 下面两项只有root可以修改，否则都是创建时从系统中选择
-	K8sNodeTags		map[string]string
-	Resources		map[string]string
+	K8sNodeTags		map[string]interface{}
+	Resources		map[string]interface{}
 }
 
 type Image struct {
