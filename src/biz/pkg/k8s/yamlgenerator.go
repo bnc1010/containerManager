@@ -14,7 +14,7 @@ import (
 func GenerateDeploymentYaml(deploymentName string, image string,portNums []interface{},replicas int32, k8snodetags map[string]interface{}, resources map[string]interface{}) (*appsv1.Deployment, error) {
 	ports := []corev1.ContainerPort{}
 	for _, _port := range portNums{
-		ports = append(ports, corev1.ContainerPort{ContainerPort: utils.GetInterfaceToInt(_port)}) 
+		ports = append(ports, corev1.ContainerPort{ContainerPort: utils.GetInterfaceToInt(_port.(map[string] interface {})["port"]), Protocol: corev1.Protocol(_port.(map[string] interface {})["protocol"].(string))}) 
 	}
 
 	resourcesMM := *utils.MapII2MapMap(resources)
