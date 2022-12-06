@@ -23,7 +23,7 @@ func MapInterface2String(inputData map[string]interface{}) map[string]string {
     return outputData
 }
 
-func GetInterfaceToInt(t1 interface{}) int32 {
+func GetInterfaceToInt32(t1 interface{}) int32 {
 	var t2 int32
 	switch t1.(type) {
 	case uint:
@@ -58,4 +58,9 @@ func GetInterfaceToInt(t1 interface{}) int32 {
 		break
 	}
 	return t2
+}
+
+
+func GetInterfaceToInt(t1 interface{}) int {
+	return int(GetInterfaceToInt32(t1))
 }

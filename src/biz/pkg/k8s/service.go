@@ -2,6 +2,7 @@ package k8s
 
 
 import (
+	"fmt"
 	"context"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,31 +32,16 @@ func GetServiceList(namespaceName string) (serviceList *corev1.ServiceList,err e
 //     nodePort: 30500
 //   selector:
 //     app: nginx
-func CreateService(namespaceName string) (serviceInfo *corev1.Service,err error) {
-	namespace := namespaceName
-	service := &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "nginx",
-			Labels: map[string]string{
-				"app":"nginx",
-			},
-		},
-		Spec: corev1.ServiceSpec{
-			Type: corev1.ServiceTypeNodePort,
-			Selector: map[string]string{
-				"app":"nginx",
-			},
-			Ports: []corev1.ServicePort{
-				{
-					Port: 80,
-					Protocol: corev1.ProtocolTCP,
-					NodePort: 30050,
-				},
-			},
-		},
+func CreateService(namespaceName string, serviceName string, selector map[string]string, portNums []interface{}) (serviceInfo *corev1.Service,err error) {
+	service, err := GenerateServiceYaml(serviceName, selector, portNums)
+	if err != nil {
+		return nil, err
 	}
-	serviceInfo,err = Client.CoreV1().Services(namespace).Create(context.TODO(),service,metav1.CreateOptions{})
-    return serviceInfo,nil
+	serviceInfo, err = Client.CoreV1().Services(namespaceName).Create(context.TODO(),service,metav1.CreateOptions{})
+    if err != nil {
+		fmt.Println(err)
+	}
+	return serviceInfo, nil
 }
 
 func GetService(namespaceName string,serviceName string) (serviceInfo *corev1.Service,err error) {

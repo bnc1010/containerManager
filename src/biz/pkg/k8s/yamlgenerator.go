@@ -8,13 +8,15 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"github.com/bnc1010/containerManager/biz/utils"
+	customError "github.com/bnc1010/containerManager/biz/pkg/error"
+	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 
 func GenerateDeploymentYaml(deploymentName string, image string,portNums []interface{},replicas int32, k8snodetags map[string]interface{}, resources map[string]interface{}) (*appsv1.Deployment, error) {
 	ports := []corev1.ContainerPort{}
 	for _, _port := range portNums{
-		ports = append(ports, corev1.ContainerPort{ContainerPort: utils.GetInterfaceToInt(_port.(map[string] interface {})["port"]), Protocol: corev1.Protocol(_port.(map[string] interface {})["protocol"].(string))}) 
+		ports = append(ports, corev1.ContainerPort{ContainerPort: utils.GetInterfaceToInt32(_port.(map[string] interface {})["port"]), Protocol: corev1.Protocol(_port.(map[string] interface {})["protocol"].(string))}) 
 	}
 
 	resourcesMM := *utils.MapII2MapMap(resources)
@@ -102,4 +104,31 @@ func GenerateDeploymentYaml(deploymentName string, image string,portNums []inter
 		},
 	}
 	return deployment, nil
+}
+
+
+func GenerateServiceYaml(serviceName string, selector map[string] string, portNums []interface{}) (*corev1.Service, error) {
+	ports := []corev1.ServicePort {}
+	for ind, _port := range portNums{
+		usablePort := utils.RandUsablePort("47.100.69.138")
+		if usablePort == -1 {
+			return nil, &customError.CommonError{"no usable port now"}
+		}
+		ports = append(ports, corev1.ServicePort{Name:fmt.Sprintf("port-%d", ind), Port: utils.GetInterfaceToInt32(_port.(map[string] interface {})["port"]), TargetPort: intstr.FromInt(utils.GetInterfaceToInt(_port.(map[string] interface {})["port"])),Protocol: corev1.Protocol(_port.(map[string] interface {})["protocol"].(string)), NodePort: usablePort}) 
+	}
+
+	fmt.Println(ports)
+	service := &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: serviceName,
+		},
+		Spec: corev1.ServiceSpec{
+			Type: corev1.ServiceTypeNodePort,
+			Selector: selector,
+			Ports: ports,
+		},
+	}
+
+	fmt.Println(service)
+	return service, nil
 }

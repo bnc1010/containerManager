@@ -83,11 +83,17 @@ func CommonOpenProject(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 尝试创建deployment
-	deploymentInfo, err := k8s.CreateSimpleDeployment("default", req.UserId + "-1", image.PullName, image.Ports, 1, project.K8sNodeTags, project.Resources)
+	// deploymentInfo, err := k8s.CreateSimpleDeployment("default", req.UserId + "-1", image.PullName, image.Ports, 1, project.K8sNodeTags, project.Resources)
+	// if err != nil {
+	// 	resp_utils.ResponseError(c, fmt.Sprintf("some thing error when open the deployment"), err)
+	// }
+	// fmt.Println(deploymentInfo)
+
+	serviceInfo, err := k8s.CreateService("default", "service-" + req.UserId + "-1", map[string]string {"app": req.UserId + "-1"}, image.Ports)
+	fmt.Println(serviceInfo)
 	if err != nil {
-		resp_utils.ResponseError(c, fmt.Sprintf("some thing error when open the deployment"), err)
+		fmt.Println(err)
 	}
-	fmt.Println(deploymentInfo)
 	c.JSON(200, utils.H{
 		"message": "ok",
 	})

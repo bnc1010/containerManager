@@ -1,7 +1,11 @@
 package utils
 
 import (
+	"net"
+	"time"
 	"strings"
+	"strconv"
+	"math/rand"
 	"github.com/cloudwego/hertz/pkg/app"
 )
 
@@ -24,4 +28,31 @@ func RemoteIp(c *app.RequestContext) string {
 	}
 	remoteAddr = strings.Split(remoteAddr, ":")[0]
 	return remoteAddr
+}
+
+
+func ScanPort(protocol string, hostname string, port int) bool {
+	p := strconv.Itoa(port)
+	addr := net.JoinHostPort(hostname, p)
+	conn, err := net.DialTimeout(protocol, addr, 200*time.Millisecond)
+	if err != nil {
+		return false
+	}
+	defer conn.Close()
+	return true
+}
+
+func RandUsablePort(hostname string) int32 {
+    rand.Seed(time.Now().UnixNano())
+	tryTime := 0
+    for ; ; {
+		port := rand.Intn(2767) + 30000
+		if !ScanPort("tcp", hostname, port){
+			return int32(port)
+		}
+		tryTime = tryTime + 1
+		if tryTime == 10 {
+			return -1
+		}
+	}
 }

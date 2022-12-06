@@ -18,3 +18,11 @@ func (e *TokenTimeoutError) Error() string {
 // func test() error {
 //    return &MyError{ "Something happened", "server.go",  42 }
 // }
+
+type CommonError struct {
+	Msg        	string
+}
+
+func (e *CommonError) Error() string {
+	return e.Msg
+ }
