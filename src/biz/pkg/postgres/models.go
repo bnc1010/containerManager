@@ -42,8 +42,10 @@ type Image struct {
 	PullName		string
 	Creator			string
 	UseGPU			bool
-	CreateTime		time.Time
+	Usable			bool
+	CreateTime		time.Time			
 	UpdateTime		time.Time
+	Ports			[]interface{}
 }
 
 type Files struct {
@@ -55,17 +57,3 @@ type Files struct {
 	UpdateTime		time.Time
 	Size			int64
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

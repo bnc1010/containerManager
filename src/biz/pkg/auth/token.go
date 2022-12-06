@@ -17,6 +17,7 @@ const (
 
 type Token struct {
 	UserName        	string
+	UserId				string
 	CreateTime			time.Time
 	Role				string
 }
@@ -40,11 +41,11 @@ func GenerateFromStr(tokenStr string) (*Token, error) {
 	}()
 
 	infos := strings.Split(tokenStr, "&")
-	if len(infos) != 3 {
+	if len(infos) != 4 {
 		return nil, errors.New("parameters error")
 	}
 	
-	timeUnix, err := strconv.ParseInt(infos[1],10,64)
+	timeUnix, err := strconv.ParseInt(infos[2],10,64)
 	if err != nil{
 		return nil, err
 	}
@@ -57,10 +58,10 @@ func GenerateFromStr(tokenStr string) (*Token, error) {
 	}
 	if maxTime != -1 {
 		if time.Now().Unix() - tm.Unix() >= 3600 {
-			return nil, &customError.TokenTimeoutError{infos[0], tm, infos[2]}
+			return nil, &customError.TokenTimeoutError{infos[0], tm, infos[3]}
 		}
 	}
 	
-	token := &Token{infos[0], tm, infos[2]}
+	token := &Token{infos[0], infos[1], tm, infos[3]}
 	return token, nil
 }

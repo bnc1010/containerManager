@@ -27,8 +27,8 @@ func testImageAdd() {
 	var t_now = time.Now()
 	var count_s = 0
 	var count_f = 0
-	for ind :=1; ind<=10000;ind ++ {
-		var image = postgres.Image{Id:"thisisarandstrforid" + utils.RandStringWithLengthN(5) , Name:"sampleimagename", Describe:"some msg for describe", PullName:"bnc1010/xxxx:v0.1", Creator:"thisisarandstrforid", UseGPU:false, CreateTime:t_now, UpdateTime:t_now}
+	for ind :=1; ind<=10;ind ++ {
+		var image = postgres.Image{Id:"thisisarandstrforid" + utils.RandStringWithLengthN(5) , Name:"sampleimagename", Describe:"some msg for describe", PullName:"bnc1010/xxxx:v0.1", Creator:"thisisarandstrforid", UseGPU:false, Usable:true, CreateTime:t_now, UpdateTime:t_now}
 		sta := postgres.ImageAdd(&image)
 		if sta {
 			count_s += 1
@@ -115,8 +115,8 @@ func testProjectAdd() {
 	var t_now = time.Now()
 	var count_s = 0
 	var count_f = 0
-	for ind :=1; ind<=10;ind ++ {
-		var project = postgres.Project{Id:"thisisarandstrforid" + utils.RandStringWithLengthN(5) , Name:"sampleprojectname", Describe:"describe info",  Owner:"thisisarandstrforid",  CreateTime:t_now, LastOpenTime:t_now, IsPublic:false , Files:map[string] interface{} {"thisisarandstrforidlhuOJ":"/test"}, Datasets:map[string] interface{} {"thisisarandstrforidlhuOJ":"/test"}, Images:[] interface{} {"i1","i2"}, ForkFrom:"fork from sample", K8sNodeTags:map[string]interface{}{"cal_type":"cpu"}, Resources:map[string]interface{} {"cpu_limit":"100m","mem_limit":"100Mi"}}
+	for ind :=1; ind<=3;ind ++ {
+		var project = postgres.Project{Id:"thisisarandstrforid" + utils.RandStringWithLengthN(5) , Name:"sampleprojectname", Describe:"describe info",  Owner:"thisisarandstrforid",  CreateTime:t_now, LastOpenTime:t_now, IsPublic:false , Files:map[string] interface{} {"thisisarandstrforidlhuOJ":"/test"}, Datasets:map[string] interface{} {"thisisarandstrforidlhuOJ":"/test"}, Images:[] interface{} {"i1","i2"}, ForkFrom:"fork from sample", K8sNodeTags:map[string]interface{}{"cal_type":"cpu"}, Resources:map[string]interface{} {"limits":map[string]interface{} {"cpu":"500m", "memory":"1Gi"}}}
 		sta := postgres.ProjectAdd(&project)
 		if sta {
 			count_s += 1

@@ -47,10 +47,14 @@ func ResponseNotFound(c *app.RequestContext) {
 }
 
 
-// ResponseNotFound 404响应体
-func ResponseErrorParameter(c *app.RequestContext) {
+// ResponseNotFound 400响应体
+func ResponseErrorParameter(c *app.RequestContext, msg ...string) {
+	_msg := "Error Parameter"
+	if len(msg) > 0 {
+		_msg = msg[0]
+	}
 	c.JSON(consts.StatusOK, utils.H{
 		"code":   10400,
-		"message": "Error Parameter",
+		"message": _msg,
 	})
 }

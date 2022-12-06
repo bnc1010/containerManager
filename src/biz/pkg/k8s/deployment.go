@@ -2,8 +2,9 @@ package k8s
 
 
 import (
+	"fmt"
 	"context"
-	corev1 "k8s.io/api/core/v1"
+	// corev1 "k8s.io/api/core/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -26,44 +27,13 @@ func GetDeployment(namespaceName string,deploymentName string)(deploymentInfo *a
 }
 
 
-func CreateSimpleDeployment(namespaceName string,deploymentName string,image string,portNum int32,replicas int32)(deploymentInfo *appsv1.Deployment,err error)  {
-
-	namespace := namespaceName
-	//这个结构和原生k8s启动deployment的yml文件结构完全一样，对着写就好
-	deployment := &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: deploymentName,
-		},
-		Spec: appsv1.DeploymentSpec{
-			Replicas: &replicas,
-			Selector: &metav1.LabelSelector{
-				MatchLabels: map[string]string{
-					"app":deploymentName,
-				},
-			},
-			Template: corev1.PodTemplateSpec{
-				ObjectMeta: metav1.ObjectMeta{
-					Labels: map[string]string{
-						"app": deploymentName,
-					},
-				},
-				Spec: corev1.PodSpec{
-					Containers: []corev1.Container{
-						{
-							Name:  deploymentName,
-							Image: image,
-							Ports: []corev1.ContainerPort{
-								{
-									ContainerPort: portNum,
-								},
-							},
-						},
-					},
-				},
-			},
-		},
+func CreateSimpleDeployment(namespaceName string,deploymentName string,image string,ports []interface{},replicas int32, k8snodetags map[string]interface{}, resources map[string]interface{})(deploymentInfo *appsv1.Deployment,err error)  {
+	deployment, err := GenerateDeploymentYaml(deploymentName,image, ports, replicas, k8snodetags, resources)
+	if err != nil {
+		return nil, err
 	}
-	deploymentInfo,err = Client.AppsV1().Deployments(namespace).Create(context.TODO(),deployment,metav1.CreateOptions{})
+	fmt.Println(deployment)
+	deploymentInfo,err = Client.AppsV1().Deployments(namespaceName).Create(context.TODO(),deployment,metav1.CreateOptions{})
     if err != nil {
 		return deploymentInfo,err
 	}

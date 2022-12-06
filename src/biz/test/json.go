@@ -7,7 +7,8 @@ import (
 
 
 func TestJson(){
-	var mp_a = map[string] interface{} {"test":"ddddd"}
+	var mp_a = map[string] interface{} {"limits": map[string] interface{} {"cpu":"500m", "memory":"1000Mi"}}
+	fmt.Println(mp_a)
 	ss, err := utils.Map2Bytes(mp_a)
 	if err != nil {
 		fmt.Println(err)

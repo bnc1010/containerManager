@@ -16,9 +16,9 @@ import (
 
 func main() {
 	Init()
-    Test()
+    // Test()
     
-    // ServerStart()
+    ServerStart()
 }
 
 //
@@ -29,8 +29,8 @@ func Test() {
     // test.EncryptionTest()
     // test.TestToken()
     // test.TestK8s()
-    test.TestPostgres()
-    // test.TestJson()
+    // test.TestPostgres()
+    test.TestJson()
 }
 
 //

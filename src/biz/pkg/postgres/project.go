@@ -1,10 +1,24 @@
 package postgres
 
 import (
+	"fmt"
+	"encoding/json"
 	"github.com/bnc1010/containerManager/biz/utils"
 )
 
+func (project * Project) Mask() {
+	project.Files 		= nil
+	project.Images		= nil
+	project.Datasets 	= nil
+	project.ForkFrom 	= ""	
+	project.Resources 	= nil
+	project.K8sNodeTags = nil
+}
+
+
+
 func ProjectInfo(projectId string)	(*Project, error) {
+	fmt.Println(projectId)
 	rows, err:= Client.Query("select * from tb_project where id=$1", projectId)
 	defer rows.Close()
 	if err!= nil{
@@ -12,13 +26,24 @@ func ProjectInfo(projectId string)	(*Project, error) {
 		return nil, err
 	}
 	var project * Project
+	var bfiles 			[]byte
+	var bdatasets 		[]byte
+	var bimages 		[]byte
+	var bk8snodeTags 	[]byte
+	var bresources 		[]byte
 	for rows.Next() {
-		err := rows.Scan(&project.Id, &project.Name, &project.Describe, &project.Owner, &project.CreateTime, &project.LastOpenTime, &project.IsPublic, &project.Files, &project.Datasets, &project.Images, &project.ForkFrom, &project.K8sNodeTags, &project.Resources)
+		project = & Project{}
+		err := rows.Scan(&project.Id, &project.Name, &project.Describe, &project.Owner, &project.CreateTime, &project.LastOpenTime, &project.IsPublic, &bfiles, &bdatasets, &bimages, &project.ForkFrom, &bk8snodeTags, &bresources)
 		if err != nil {
 			projectErrorLoger(err)
 			return nil, err
 		}
 	}
+	json.Unmarshal(bfiles, 		&project.Files)
+	json.Unmarshal(bdatasets, 	&project.Datasets)
+	json.Unmarshal(bimages, 	&project.Images)
+	json.Unmarshal(bk8snodeTags,&project.K8sNodeTags)
+	json.Unmarshal(bresources, 	&project.Resources)
 	return project, nil
 }
 
@@ -29,11 +54,11 @@ func ProjectAdd(project *Project) bool {
 		projectErrorLoger(err)
 		return false
 	}
-	files_json, _ := utils.Map2Bytes(project.Files)
-	datasets_json, _ := utils.Map2Bytes(project.Datasets)
+	files_json, _ 		:= utils.Map2Bytes(project.Files)
+	images_json, _ 		:= utils.Array2Bytes(project.Images)
+	datasets_json, _ 	:= utils.Map2Bytes(project.Datasets)
+	resources_json, _ 	:= utils.Map2Bytes(project.Resources)
 	k8snodetags_json, _ := utils.Map2Bytes(project.K8sNodeTags)
-	resources_json, _ := utils.Map2Bytes(project.Resources)
-	images_json, _ := utils.Array2Bytes(project.Images)
 	_, err = stmt.Exec(project.Id, project.Name, project.Describe, project.Owner, project.CreateTime, project.LastOpenTime, project.IsPublic, files_json, datasets_json, images_json, project.ForkFrom, k8snodetags_json, resources_json)
 	if err != nil {
 		projectErrorLoger(err)
