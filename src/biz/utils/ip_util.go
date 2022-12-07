@@ -46,7 +46,7 @@ func RandUsablePort(hostname string) int32 {
     rand.Seed(time.Now().UnixNano())
 	tryTime := 0
     for ; ; {
-		port := rand.Intn(2767) + 30000
+		port := rand.Intn(1000) + 30000
 		if !ScanPort("tcp", hostname, port){
 			return int32(port)
 		}
