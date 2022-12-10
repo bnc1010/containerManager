@@ -102,3 +102,23 @@ func AdminPodHeapsterCpu(ctx context.Context, c *app.RequestContext) {
 	}
 	resp_utils.ResponseOK(c, responseMsg.Success, podUsage)
 }
+
+func AdminPodLog(ctx context.Context, c *app.RequestContext) {
+	var req PodLog
+	err := c.BindAndValidate(&req)
+	if err != nil {
+		hlog.CtxErrorf(ctx, "[PostTest] Unmarshal failed, err: %v", err)
+		resp_utils.ResponseErrorParameter(c)
+		return
+	}
+	if !req.VaildTailLines() {
+		resp_utils.ResponseErrorParameter(c, "lines should in [100,10000], and mod 100 is 0")
+		return
+	}
+	logs, err := k8s.PodLog(req.Namespace, req.Pod, nil, &sinceTime, &req.TailLines)
+	if err != nil {
+		resp_utils.ResponseError(c, "Get Pod Log Error", err)
+		return
+	}
+	resp_utils.ResponseOK(c, responseMsg.Success, logs)
+}

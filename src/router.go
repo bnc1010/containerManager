@@ -27,6 +27,7 @@ func customizedRegister(r *server.Hertz) {
 	r.POST("/admin/podsMetrics", handler.AdminPodsMetrics)
 	r.POST("/admin/podMemory", handler.AdminPodHeapsterMemory)
 	r.POST("/admin/podCpu", handler.AdminPodHeapsterCpu)
+	r.POST("/admin/podLog", handler.AdminPodLog)
 	
 	
 	
