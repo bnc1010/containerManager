@@ -1,16 +1,16 @@
 package postgres
 
 import (
-	"fmt"
+	// "fmt"
 	"encoding/json"
 	"github.com/bnc1010/containerManager/biz/utils"
 )
 
 func (project * Project) Mask() {
+	project.ForkFrom 	= ""	
 	project.Files 		= nil
 	project.Images		= nil
 	project.Datasets 	= nil
-	project.ForkFrom 	= ""	
 	project.Resources 	= nil
 	project.K8sNodeTags = nil
 }
@@ -18,7 +18,6 @@ func (project * Project) Mask() {
 
 
 func ProjectInfo(projectId string)	(*Project, error) {
-	fmt.Println(projectId)
 	rows, err:= Client.Query("select * from tb_project where id=$1", projectId)
 	defer rows.Close()
 	if err!= nil{
@@ -95,4 +94,35 @@ func ProjectUpdate(project *Project) bool {
 		return false
 	}
 	return true
+}
+
+func ProjectsGetByUserId(userId string) ([] *Project, error) {
+	rows, err:= Client.Query("select * from tb_project where owner=$1", userId)
+	defer rows.Close()
+	if err!= nil{
+		projectErrorLoger(err)
+		return nil, err
+	}
+	var project * Project
+	var projects [] * Project
+	var bfiles 			[]byte
+	var bdatasets 		[]byte
+	var bimages 		[]byte
+	var bk8snodeTags 	[]byte
+	var bresources 		[]byte
+	for rows.Next() {
+		project = & Project{}
+		err := rows.Scan(&project.Id, &project.Name, &project.Describe, &project.Owner, &project.CreateTime, &project.LastOpenTime, &project.IsPublic, &bfiles, &bdatasets, &bimages, &project.ForkFrom, &bk8snodeTags, &bresources)
+		if err != nil {
+			projectErrorLoger(err)
+			return nil, err
+		}
+		json.Unmarshal(bfiles, 		&project.Files)
+		json.Unmarshal(bdatasets, 	&project.Datasets)
+		json.Unmarshal(bimages, 	&project.Images)
+		json.Unmarshal(bk8snodeTags,&project.K8sNodeTags)
+		json.Unmarshal(bresources, 	&project.Resources)
+		projects = append(projects, project)
+	}
+	return projects, nil
 }

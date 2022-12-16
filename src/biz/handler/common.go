@@ -43,7 +43,6 @@ func CommonOpenProject(ctx context.Context, c *app.RequestContext) {
 		resp_utils.ResponseErrorParameter(c)
 		return 
 	}
-	fmt.Println(req)
 	project, err := postgres.ProjectInfo(req.ProjectId)
 	if err != nil {
 		resp_utils.ResponseErrorParameter(c)
@@ -123,4 +122,31 @@ func CommonProjectInfo(ctx context.Context, c *app.RequestContext) {
 		fmt.Println(project)
 	}
 	resp_utils.ResponseOK(c, responseMsg.Success, project)
+}
+
+func CommonProjectGetByUserId(ctx context.Context, c *app.RequestContext) {
+	requestUserId := ctx.Value("requestUserId")
+	type Reqbody struct {
+		UserId 					string `json:"userId,required"`
+	}
+	var req Reqbody
+    err := c.BindAndValidate(&req)
+	if err != nil {
+		resp_utils.ResponseErrorParameter(c)
+		return 
+	}
+	projects, err := postgres.ProjectsGetByUserId(req.UserId)
+	if err != nil {
+		resp_utils.ResponseError(c, "get projects error", err)
+		return
+	}
+	
+	resProjects  := [] *postgres.Project {}
+	//需要检查这些project是否是当前用户拥有的&其他用户公开的
+	for _,project := range projects {
+		if project.Owner == requestUserId || project.IsPublic {
+			resProjects = append(resProjects, project)
+		}
+	}
+	resp_utils.ResponseOK(c, responseMsg.Success, resProjects)
 }

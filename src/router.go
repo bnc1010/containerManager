@@ -17,6 +17,7 @@ func customizedRegister(r *server.Hertz) {
 	r.POST("/common/postping", handler.CommonPostTest)
 	r.POST("/common/openProject", handler.CommonOpenProject)
 	r.POST("/common/infoProject", handler.CommonProjectInfo)
+	r.POST("/common/getProjectByUserId", handler.CommonProjectGetByUserId)
 	
 	
 	// admin

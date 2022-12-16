@@ -122,3 +122,13 @@ func AdminPodLog(ctx context.Context, c *app.RequestContext) {
 	}
 	resp_utils.ResponseOK(c, responseMsg.Success, logs)
 }
+
+// func AdminProjectList(ctx context.Context, c *app.RequestContext) {
+
+// 	resp_utils.ResponseOK(c, responseMsg.Success)
+// }
+
+// func AdminGetProject(ctx context.Context, c *app.RequestContext) {
+	
+// 	resp_utils.ResponseOK(c, responseMsg.Success)
+// }
