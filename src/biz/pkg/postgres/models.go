@@ -33,6 +33,7 @@ type Project struct {
 	// 下面两项只有root可以修改，否则都是创建时从系统中选择
 	K8sNodeTags		map[string]interface{}
 	Resources		map[string]interface{}
+	Usable			bool
 }
 
 type Image struct {

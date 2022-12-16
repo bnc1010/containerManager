@@ -32,7 +32,7 @@ func ProjectInfo(projectId string)	(*Project, error) {
 	var bresources 		[]byte
 	for rows.Next() {
 		project = & Project{}
-		err := rows.Scan(&project.Id, &project.Name, &project.Describe, &project.Owner, &project.CreateTime, &project.LastOpenTime, &project.IsPublic, &bfiles, &bdatasets, &bimages, &project.ForkFrom, &bk8snodeTags, &bresources)
+		err := rows.Scan(&project.Id, &project.Name, &project.Describe, &project.Owner, &project.CreateTime, &project.LastOpenTime, &project.IsPublic, &bfiles, &bdatasets, &bimages, &project.ForkFrom, &bk8snodeTags, &bresources, &project.Usable)
 		if err != nil {
 			projectErrorLoger(err)
 			return nil, err

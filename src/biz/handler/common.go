@@ -72,30 +72,30 @@ func CommonOpenProject(ctx context.Context, c *app.RequestContext) {
 		}
 		// image合法但是被设置禁用
 		if !image.Usable {
-			resp_utils.ResponseErrorParameter(c, fmt.Sprintf("chosen image is be set to unusable"))
+			resp_utils.ResponseErrorParameter(c, "chosen image is be set to unusable")
 			return
 		}
 	}
 	if !imageOK {
-		resp_utils.ResponseErrorParameter(c, fmt.Sprintf("no usable image"))
+		resp_utils.ResponseErrorParameter(c, "no usable image")
 		return
 	}
 
-	// 尝试创建deployment
-	deploymentInfo, err := k8s.CreateSimpleDeployment("default", req.UserId + "-1", image.PullName, image.Ports, 1, project.K8sNodeTags, project.Resources)
-	if err != nil {
-		resp_utils.ResponseError(c, fmt.Sprintf("some thing error when open the deployment"), err)
-	}
-	fmt.Println(deploymentInfo)
+	namespace			:= "default"
+	deploymentName		:= req.UserId + "-1"
+	serviceName			:= "service-" + deploymentName
 
-	serviceInfo, err := k8s.CreateService("default", "service-" + req.UserId + "-1", map[string]string {"app": req.UserId + "-1"}, image.Ports)
-	fmt.Println(serviceInfo)
+	// 尝试创建deployment
+	_, err = k8s.CreateSimpleDeployment(namespace, deploymentName, image.PullName, image.Ports, 1, project.K8sNodeTags, project.Resources)
 	if err != nil {
-		fmt.Println(err)
+		resp_utils.ResponseError(c, "some thing error when open the deployment", err)
 	}
-	c.JSON(200, utils.H{
-		"message": "ok",
-	})
+	_, err = k8s.CreateService(namespace, serviceName, map[string]string {"app": deploymentName}, image.Ports)
+	if err != nil {
+		resp_utils.ResponseError(c, "some thing error when create the service", err)
+		k8s.DeleteDeployment(namespace, deploymentName)
+	}
+	resp_utils.ResponseOK(c, responseMsg.Success, deploymentName)
 }
 //curl -d '{"userId":"423h4huhuhfuseu34", "projectId":"thisisarandstrforidqQgmb", "imageId":"thisisarandstrforidPOwjG"}' -H "Content-Type:application/json" -H "AUTH_TOKEN:Aa2N9jIOFz4If8Qn/EPGAn2nTd4z0BkcM45E6YetcGI1x9NOgDkUQFftPcNaAI6R "  -X POST http://127.0.0.1:8888/common/openProject
 
