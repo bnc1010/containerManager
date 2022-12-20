@@ -2,12 +2,14 @@ package handler
 
 import (
 	"fmt"
+	"time"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/bnc1010/containerManager/biz/pkg/postgres"
 	"github.com/bnc1010/containerManager/biz/pkg/k8s"
+	"github.com/bnc1010/containerManager/biz/pkg/filecontrol"
 	resp_utils "github.com/bnc1010/containerManager/biz/utils"
 )
 
@@ -81,6 +83,10 @@ func CommonOpenProject(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
+
+	//
+	// todo: 动态配置的namespace，以及deploymentName怎么给，每个用户最多同时可以开多少个
+	//
 	namespace			:= "default"
 	deploymentName		:= req.UserId + "-1"
 	serviceName			:= "service-" + deploymentName
@@ -142,7 +148,7 @@ func CommonProjectGetByUserId(ctx context.Context, c *app.RequestContext) {
 	}
 	
 	resProjects  := [] *postgres.Project {}
-	//需要检查这些project是否是当前用户拥有的&其他用户公开的
+	// 需要检查这些project是否是当前用户拥有的&其他用户公开的
 	for _,project := range projects {
 		if project.Owner == requestUserId || project.IsPublic {
 			resProjects = append(resProjects, project)
@@ -150,3 +156,75 @@ func CommonProjectGetByUserId(ctx context.Context, c *app.RequestContext) {
 	}
 	resp_utils.ResponseOK(c, responseMsg.Success, resProjects)
 }
+
+
+func CommonCreateProject(ctx context.Context, c *app.RequestContext) {
+	requestUserId := fmt.Sprintf("%v",ctx.Value("requestUserId"))
+	type Reqbody struct {
+		ProjectName 					string	`json:"projectName,required"`
+		Describe						string	`json:"describe"`
+		IsPublic						bool	`json:"isPublic"`
+		Images						  []string	`json:"images"`
+		K8sNodeTagIds				  []string	`json:"k8sNodeTagIds"`
+		ResourcesId						string	`json:"resourcesId"`
+	}
+	var req Reqbody
+    err := c.BindAndValidate(&req)
+	if err != nil {
+		resp_utils.ResponseErrorParameter(c)
+		return 
+	}
+	nowTime := time.Now()
+	projectId := resp_utils.RandStringWithLengthN(36)
+	project := postgres.Project{Id:projectId, Name:req.ProjectName, Describe:req.Describe, Owner:requestUserId, CreateTime:nowTime, IsPublic:req.IsPublic, Usable:true, Files:map[string]interface{}{}, Datasets:map[string]interface{}{}, Images:[]interface{}{}, K8sNodeTags:map[string]interface{}{}, Resources:map[string]interface{}{}}
+	fmt.Println(project)
+	// 创建专属文件File
+	// fileId := resp_utils.RandStringWithLengthN(36)
+	fileId := "JWFzbHYEejRSSJZjqogRAmzbTWieHlJQbtLk"
+	newFilePath, err := filecontrol.GenerateFilePath(requestUserId, fileId)
+	if err != nil {
+		resp_utils.ResponseError(c, "create project error", err)
+		return
+	}
+	dirSize,dirCount := filecontrol.CalDirSize(newFilePath)
+	file := postgres.Files{Id:fileId , Name:req.ProjectName + "-file", Creator:requestUserId, Path:newFilePath, CreateTime:nowTime, UpdateTime:nowTime, Size:dirSize}
+	fmt.Println(dirSize,dirCount,file)
+	// sta := postgres.FilesAdd(&file)
+	// if !sta {
+	// 	resp_utils.ResponseError(c, "create project error", err)
+	// 	return
+	// }
+	project.Files[fileId] = "/userfile"
+	// 绑定Images
+	for _, imageId := range req.Images {
+		if postgres.ImagePublicCheck(imageId) {
+			project.Images = append(project.Images, imageId)
+		}
+	}
+	// 绑定Datasets
+
+	// K8sNodeTags
+	var k8sNodeTagList []* postgres.K8sNodeTag
+	for _, t := range req.K8sNodeTagIds {
+		k8sNodeTag, err := postgres.K8sNodeTagInfo(t)
+		if k8sNodeTag != nil && err == nil {
+			k8sNodeTagList = append(k8sNodeTagList, k8sNodeTag)
+		}
+	}
+	project.FillK8sNodeTags(k8sNodeTagList)
+	// Resources
+	resources, err := postgres.ResourcesInfo(req.ResourcesId)
+	if resources == nil || err != nil || !resources.IsPublic {
+		resources = &postgres.Resources{}
+		resources.Default()
+	}
+	fmt.Println(resources)
+	project.FillResources(resources)
+	fmt.Println(project)
+}
+//curl -d '{"projectName":"testproject","describe":"something for describe","isPublic":true, "images":["thisisarandstrforidPOwjG"]}' -H "Content-Type:application/json" -H "AUTH_TOKEN:Aa2N9jIOFz4If8Qn/EPGAn2nTd4z0BkcM45E6YetcGI1x9NOgDkUQFftPcNaAI6R"  -X POST http://127.0.0.1:8888/common/createProject
+
+
+// func CommonForkProject(ctx context.Context, c *app.RequestContext) {
+
+// }

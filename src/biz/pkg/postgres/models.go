@@ -58,3 +58,18 @@ type Files struct {
 	UpdateTime		time.Time
 	Size			int64
 }
+
+
+type Resources struct {
+	Id				string
+	Value			map[string]interface{}
+	IsPublic		bool
+}
+
+
+type K8sNodeTag struct {
+	Id				string
+	Key				string
+	Value			string
+	IsPublic		bool
+}

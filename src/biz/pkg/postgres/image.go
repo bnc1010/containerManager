@@ -71,3 +71,8 @@ func ImageUpdate(image *Image) bool {
 	}
 	return true
 }
+
+func ImagePublicCheck(imageId string) bool {
+	image, err := ImageInfo(imageId)
+	return !(err != nil || image == nil || !image.Usable)
+}

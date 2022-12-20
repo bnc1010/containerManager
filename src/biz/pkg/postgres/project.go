@@ -15,6 +15,18 @@ func (project * Project) Mask() {
 	project.K8sNodeTags = nil
 }
 
+func (project * Project) FillK8sNodeTags(k8sNodeTagList []*K8sNodeTag) bool {
+	for _, tag := range k8sNodeTagList {
+		project.K8sNodeTags[tag.Key] = tag.Value
+	}
+	return true
+}
+
+func (project * Project) FillResources(resources * Resources) bool {
+	project.Resources = resources.Value
+	return true
+}
+
 
 
 func ProjectInfo(projectId string)	(*Project, error) {
@@ -112,7 +124,7 @@ func ProjectsGetByUserId(userId string) ([] *Project, error) {
 	var bresources 		[]byte
 	for rows.Next() {
 		project = & Project{}
-		err := rows.Scan(&project.Id, &project.Name, &project.Describe, &project.Owner, &project.CreateTime, &project.LastOpenTime, &project.IsPublic, &bfiles, &bdatasets, &bimages, &project.ForkFrom, &bk8snodeTags, &bresources)
+		err := rows.Scan(&project.Id, &project.Name, &project.Describe, &project.Owner, &project.CreateTime, &project.LastOpenTime, &project.IsPublic, &bfiles, &bdatasets, &bimages, &project.ForkFrom, &bk8snodeTags, &bresources, &project.Usable)
 		if err != nil {
 			projectErrorLoger(err)
 			return nil, err
@@ -126,3 +138,4 @@ func ProjectsGetByUserId(userId string) ([] *Project, error) {
 	}
 	return projects, nil
 }
+

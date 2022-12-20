@@ -22,3 +22,11 @@ func filesErrorLoger(err error) {
 func datasetErrorLoger(err error) {
 	hlog.CtxFatalf(ctx, "[Postgres - Dataset] ", err)
 }
+
+func resourcesErrorLoger(err error) {
+	hlog.CtxFatalf(ctx, "[Postgres - Resources] ", err)
+}
+
+func k8sNodeTagErrorLoger(err error) {
+	hlog.CtxFatalf(ctx, "[Postgres - K8sNodeTag] ", err)
+}

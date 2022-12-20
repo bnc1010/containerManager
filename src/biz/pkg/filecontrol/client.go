@@ -2,7 +2,10 @@ package filecontrol
 
 import (
 	"os"
-	// "fmt"
+	"fmt"
+	"io/ioutil"
+	"path/filepath"
+	"sync"
 	"context"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/bnc1010/containerManager/biz/utils"
@@ -76,7 +79,85 @@ func InitPath() bool {
 		}
 	}
 
-
 	hlog.CtxInfof(ctx, "[FilePath] FILE_ROOT: %#v",SystemPath.Root)
 	return true
+}
+
+func GenerateFilePath(userId string, fileId string) (string, error) {
+	userPath := SystemPath.UserFilePath + "/" + userId
+	exist, _  := utils.PathExists(userPath)
+	if !exist {
+		err := os.Mkdir(userPath, 0755)
+		if err != nil {
+			return "", err
+		}
+	}
+	
+	filePath := userPath + "/" + fileId
+	exist, _  = utils.PathExists(filePath)
+	if !exist {
+		err := os.Mkdir(filePath, 0755)
+		if err != nil {
+			return "", err
+		}
+	}
+	return filePath, nil
+}
+
+func GenerateDatasetpath(userId string, datasetId string) (string, error) {
+	userPath := SystemPath.DatasetPath + "/" + userId
+	exist, _  := utils.PathExists(userPath)
+	if !exist {
+		err := os.Mkdir(userPath, 0755)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	datasetPath := userPath + "/" + datasetId
+	exist, _  = utils.PathExists(datasetPath)
+	if !exist {
+		err := os.Mkdir(datasetPath, 0755)
+		if err != nil {
+			return "", err
+		}
+	}
+	return datasetPath, nil
+}
+
+
+func scanDir(path string, syncM *sync.Map, wait *sync.WaitGroup){
+	defer wait.Done()
+	dirAry,err := ioutil.ReadDir(path)
+	if err != nil {
+		panic(err);
+	}
+	fmt.Println(dirAry)
+	for _,e := range dirAry{
+		if e.IsDir(){
+			wait.Add(1)
+			go scanDir(filepath.Join(path,e.Name()), syncM, wait)
+		}else{
+			syncM.Store(filepath.Join(path,e.Name()),(e.Size()))
+		}
+	}
+}	
+
+func CalDirSize(path string) (int64, int64) {
+	fmt.Println(path)
+	var syncM sync.Map
+	var wait sync.WaitGroup
+	wait.Add(1)
+	go scanDir(path, &syncM, &wait)
+	wait.Wait()
+	var fileCount int64
+	var dirSize int64
+	syncM.Range(func(key, value interface{}) bool {
+		fileCount++
+		v := value.(int64)
+		fmt.Println(v)
+		dirSize += v
+		return true
+	})
+	return dirSize, fileCount
 }
