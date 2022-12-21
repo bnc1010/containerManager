@@ -123,9 +123,7 @@ func CommonProjectInfo(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	if project.Owner != req.UserId && project.IsPublic == false {
-		fmt.Println("debug")
 		project.Mask()
-		fmt.Println(project)
 	}
 	resp_utils.ResponseOK(c, responseMsg.Success, project)
 }

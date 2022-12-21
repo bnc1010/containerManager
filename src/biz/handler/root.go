@@ -7,6 +7,7 @@ import (
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/bnc1010/containerManager/biz/pkg/k8s"
+	"github.com/bnc1010/containerManager/biz/pkg/postgres"
 	resp_utils "github.com/bnc1010/containerManager/biz/utils"
 )
 
@@ -127,3 +128,57 @@ func RootNodesMetrics(ctx context.Context, c *app.RequestContext) {
 	}
 	resp_utils.ResponseOK(c, responseMsg.Success, data)
 }
+
+func RootGetResourcesList(ctx context.Context, c *app.RequestContext) {
+	resourcesList, err := postgres.ResourcesListForRoot()
+	if err != nil {
+		resp_utils.ResponseError(c, "Get ResourcesList error:", err)
+		return
+	}
+	resp_utils.ResponseOK(c, responseMsg.Success, resourcesList)
+}
+
+func RootAddResources(ctx context.Context, c *app.RequestContext) {
+	type Reqbody struct {
+		Value							map[string]interface{}		`json:"value"`
+		IsPublic						bool						`json:"isPublic"`
+	}
+	var req Reqbody
+    err := c.BindAndValidate(&req)
+	if err != nil {
+		resp_utils.ResponseErrorParameter(c)
+		return 
+	}
+	resourcesId := resp_utils.RandStringWithLengthN(36)
+	resources := &postgres.Resources{Id:resourcesId, Value:req.Value, IsPublic:req.IsPublic}
+	sta := postgres.ResourcesAdd(resources)
+	if !sta {
+		resp_utils.ResponseError(c, "Add Resources error", nil)
+		return
+	}
+	resp_utils.ResponseOK(c, responseMsg.Success, nil)
+}
+
+func RootEditResources(ctx context.Context, c *app.RequestContext) {
+	type Reqbody struct {
+		Id								string						`json:"id, require"`
+		Value							map[string]interface{}		`json:"value"`
+		IsPublic						bool						`json:"isPublic"`
+	}
+	resources := &postgres.Resources{Id:req.Id, Value:req.Value, IsPublic:req.IsPublic}
+	sta := postgres.ResourcesUpdate(resources)
+	if !sta {
+		resp_utils.ResponseError(c, "Update Resources error", nil)
+		return
+	}
+	resp_utils.ResponseOK(c, responseMsg.Success, nil)
+}
+
+// func RootDeleteResources(ctx context.Context, c *app.RequestContext) {
+// 	resourcesList, err := postgres.ResourcesListForRoot
+// 	if err != nil {
+// 		resp_utils.ResponseError(c, "Get ResourcesList error:", err)
+// 		return
+// 	}
+// 	resp_utils.ResponseOK(c, responseMsg.Success, resourcesList)
+// }
