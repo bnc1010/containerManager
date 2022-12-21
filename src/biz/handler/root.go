@@ -165,6 +165,12 @@ func RootEditResources(ctx context.Context, c *app.RequestContext) {
 		Value							map[string]interface{}		`json:"value"`
 		IsPublic						bool						`json:"isPublic"`
 	}
+	var req Reqbody
+    err := c.BindAndValidate(&req)
+	if err != nil {
+		resp_utils.ResponseErrorParameter(c)
+		return 
+	}
 	resources := &postgres.Resources{Id:req.Id, Value:req.Value, IsPublic:req.IsPublic}
 	sta := postgres.ResourcesUpdate(resources)
 	if !sta {
