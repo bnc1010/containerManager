@@ -113,8 +113,8 @@ type PodUsage struct {
     LatestTimestamp time.Time   `json:"latestTimestamp"`
 }
 
-func GetPodList(namespaceName string) (podList *corev1.PodList, err error) {
-	podList, err = Client.CoreV1().Pods(namespaceName).List(context.TODO(), metav1.ListOptions{})
+func GetPodList(namespaceName string, fieldSelector string, labelSelector string) (podList *corev1.PodList, err error) {
+	podList, err = Client.CoreV1().Pods(namespaceName).List(context.TODO(), metav1.ListOptions{FieldSelector: fieldSelector, LabelSelector: labelSelector})
 	if err != nil {
 		return podList, err
 	}
@@ -129,13 +129,13 @@ func GetPod(namespaceName string,podName string) (podInfo *corev1.Pod, err error
 	return podInfo, nil
 }
 
-func PodsMetrics() (nodes *PodMetricsList, err error) {
+func PodsMetrics() (pods *PodMetricsList, err error) {
 	data, err := Client.RESTClient().Get().AbsPath("apis/metrics.k8s.io/v1beta1/pods").DoRaw(context.TODO())
 	if err != nil {
 		return nil, err
 	}
-	json.Unmarshal(data, &nodes)
-	return nodes, nil
+	json.Unmarshal(data, &pods)
+	return pods, nil
 }
 
 func PodHeapsterMemory(namespaceName string,podName string)  (podUsage * PodUsage, err error)  {
@@ -158,7 +158,7 @@ func PodHeapsterCpu(namespaceName string,podName string) (podUsage * PodUsage, e
     return podUsage, nil
 }
 
-func GetContainersOfPod(namespaceName string,podName string) ([]string, error) {
+func GetContainersOfPod(namespaceName string, podName string, containerName * string) ([]string, error) {
     podContainersNames := []string{}
     podInfo, err := GetPod(namespaceName, podName)
     if err != nil {
@@ -166,14 +166,21 @@ func GetContainersOfPod(namespaceName string,podName string) ([]string, error) {
     }
     for _, container := range podInfo.Spec.Containers {
         fmt.Println(container)
-        podContainersNames = append(podContainersNames, container.Name)
+        if containerName == nil{
+            podContainersNames = append(podContainersNames, container.Name)
+            continue
+        }
+        if container.Name == *containerName {
+            podContainersNames = append(podContainersNames, container.Name)
+            break
+        }
     }
     return podContainersNames, nil
 }
 
-func PodLog(namespaceName string,podName string, sincetime *string, since *string, tailLines *int64) (string, error) {
-    fmt.Println(podName, sincetime, since, tailLines)
-    containers, err := GetContainersOfPod(namespaceName, podName)
+func PodLog(namespaceName string,podName string, containerName * string, sincetime *string, since *string, tailLines *int64) (string, error) {
+    // fmt.Println(podName, sincetime, since, tailLines)
+    containers, err := GetContainersOfPod(namespaceName, podName, containerName)
     if err != nil {
         return "", err
     }
@@ -184,7 +191,7 @@ func PodLog(namespaceName string,podName string, sincetime *string, since *strin
     if err != nil {
         return "", err
     }
-    fmt.Println(logOptions)
+    // fmt.Println(logOptions)
     stream, err := Client.CoreV1().Pods(namespaceName).GetLogs(podName, logOptions).Stream(context.TODO())
     defer stream.Close()
     buf := new(bytes.Buffer)

@@ -10,8 +10,8 @@ import (
 )
 
 
-func GetDeploymentList(namespaceName string)(deploymentList *appsv1.DeploymentList,err error)  {
-	deploymentList,err = Client.AppsV1().Deployments(namespaceName).List(context.TODO(), metav1.ListOptions{})
+func GetDeploymentList(namespaceName string, fieldSelector string)(deploymentList *appsv1.DeploymentList,err error)  {
+	deploymentList,err = Client.AppsV1().Deployments(namespaceName).List(context.TODO(), metav1.ListOptions{FieldSelector: fieldSelector})
 	if err != nil{
 		return nil, err
 	}
@@ -100,7 +100,7 @@ func GetPodsLogOfDeployment(namespaceName string,deploymentName string) (map[str
 	tailLines := int64(100)
 	since := "72h"
 	for _, item := range podList.Items {
-		log, err := PodLog(namespaceName ,item.ObjectMeta.Name, nil, &since, &tailLines)
+		log, err := PodLog(namespaceName ,item.ObjectMeta.Name, nil, nil, &since, &tailLines)
 		if err == nil {
 			mp[item.ObjectMeta.Name] = log
 		} else {

@@ -1,26 +1,34 @@
 package handler
 
 type Namespace struct {
-	Name string 		`json:"namespace,required"`
+	Name 					string 					`json:"namespace,required"`
+	FieldSelector string 					`json:"fieldSelector"`
+	LabelSelector string 					`json:"labelSelector"`
 }
 
 type Node struct {
-	Name string 		`json:"node,required`
+	Name string 									`json:"node,required`
 }
 
 type Pod struct {
-	Name string 		`json:"pod,required"`
-	Namespace string 	`json:"namespace,required"`
+	Name 					string 					`json:"pod,required"`
+	Namespace 		string 					`json:"namespace,required"`
+}
+
+type Deployment struct {
+	Name 					string 					`json:"deployment,required"`
+	Namespace 		string 					`json:"namespace,required"`
 }
 
 type PodLog struct {		
-	Pod string 			`json:"pod,required"`
-	Namespace string 	`json:"namespace,required"`
-	TailLines int64		`json:"lines"`
+	Pod string 										`json:"pod,required"`
+	Namespace string 							`json:"namespace,required"`
+	TailLines int64								`json:"lines,required"`
+	Container string							`json:"container,required"`
 }
 
 func (podlog * PodLog) VaildTailLines() bool {
-	if podlog.TailLines > 0 && podlog.TailLines < 10000 && (podlog.TailLines % 100) == 0 {
+	if podlog.TailLines > 0 && podlog.TailLines < 10000 && (podlog.TailLines % 50) == 0 {
 		return true
 	} else {
 		return false
@@ -34,4 +42,4 @@ type ResponseMsg struct {
 }
 
 var responseMsg = ResponseMsg{"Success", "System Error", "No Permission"}
-var sinceTime string = "168h"
+var sinceTime string = "8640h"

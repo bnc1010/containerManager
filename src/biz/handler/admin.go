@@ -37,7 +37,7 @@ func AdminGetPodList(ctx context.Context, c *app.RequestContext) {
 		resp_utils.ResponseErrorParameter(c)
 		return
 	}
-	podList,err := k8s.GetPodList(req.Name)
+	podList,err := k8s.GetPodList(req.Name, req.FieldSelector, req.LabelSelector)
 	if err != nil {
 		resp_utils.ResponseError(c, "Get PodList Error", err)
 		return
@@ -61,6 +61,23 @@ func AdminGetPod(ctx context.Context, c *app.RequestContext) {
 	}
 	resp_utils.ResponseOK(c, responseMsg.Success, podInfo)
 }
+
+func AdminGetPodEvent(ctx context.Context, c *app.RequestContext) {
+	var req Namespace
+	err := c.BindAndValidate(&req)
+	if err != nil {
+		hlog.CtxErrorf(ctx, "[PostTest] Unmarshal failed, err: %v", err)
+		resp_utils.ResponseErrorParameter(c)
+		return
+	}
+	eventList, err := k8s.GetEventList(req.Name, req.FieldSelector)
+	if err != nil {
+		resp_utils.ResponseError(c, "Get Pod Error", err)
+		return
+	}
+	resp_utils.ResponseOK(c, responseMsg.Success, eventList)
+}
+
 
 func AdminPodsMetrics(ctx context.Context, c *app.RequestContext) {
 	data, err := k8s.PodsMetrics()
@@ -115,7 +132,7 @@ func AdminPodLog(ctx context.Context, c *app.RequestContext) {
 		resp_utils.ResponseErrorParameter(c, "lines should in [100,10000], and mod 100 is 0")
 		return
 	}
-	logs, err := k8s.PodLog(req.Namespace, req.Pod, nil, &sinceTime, &req.TailLines)
+	logs, err := k8s.PodLog(req.Namespace, req.Pod, &req.Container, nil, &sinceTime, &req.TailLines)
 	if err != nil {
 		resp_utils.ResponseError(c, "Get Pod Log Error", err)
 		return
@@ -132,3 +149,52 @@ func AdminPodLog(ctx context.Context, c *app.RequestContext) {
 	
 // 	resp_utils.ResponseOK(c, responseMsg.Success)
 // }
+
+func AdminGetDeploymentList(ctx context.Context, c *app.RequestContext) {
+	var req Namespace
+	err := c.BindAndValidate(&req)
+	if err != nil {
+		hlog.CtxErrorf(ctx, "[PostTest] Unmarshal failed, err: %v", err)
+		resp_utils.ResponseErrorParameter(c)
+		return
+	}
+	deploymentList,err := k8s.GetDeploymentList(req.Name, req.FieldSelector)
+	if err != nil {
+		resp_utils.ResponseError(c, "Get DeploymentList Error", err)
+		return
+	}
+	resp_utils.ResponseOK(c, responseMsg.Success, deploymentList)
+}
+
+func AdminGetDeployment(ctx context.Context, c *app.RequestContext) {
+	var req Deployment
+	err := c.BindAndValidate(&req)
+	if err != nil {
+		hlog.CtxErrorf(ctx, "[PostTest] Unmarshal failed, err: %v", err)
+		resp_utils.ResponseErrorParameter(c)
+		return
+	}
+	deploymentInfo, err := k8s.GetDeployment(req.Namespace, req.Name)
+	if err != nil {
+		resp_utils.ResponseError(c, "Get Pod Error", err)
+		return
+	}
+	resp_utils.ResponseOK(c, responseMsg.Success, deploymentInfo)
+}
+
+
+func AdminGetServiceList(ctx context.Context, c *app.RequestContext) {
+	var req Namespace
+	err := c.BindAndValidate(&req)
+	if err != nil {
+		hlog.CtxErrorf(ctx, "[PostTest] Unmarshal failed, err: %v", err)
+		resp_utils.ResponseErrorParameter(c)
+		return
+	}
+	serviceList,err := k8s.GetServiceList(req.Name, req.FieldSelector, req.LabelSelector)
+	if err != nil {
+		resp_utils.ResponseError(c, "Get PodList Error", err)
+		return
+	}
+	resp_utils.ResponseOK(c, responseMsg.Success, serviceList)
+}

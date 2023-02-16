@@ -9,8 +9,8 @@ import (
 )
 
 
-func GetServiceList(namespaceName string) (serviceList *corev1.ServiceList,err error) {
-	serviceList,err = Client.CoreV1().Services(namespaceName).List(context.TODO(),metav1.ListOptions{})
+func GetServiceList(namespaceName string, fieldSelector string, labelSelector string) (serviceList *corev1.ServiceList,err error) {
+	serviceList,err = Client.CoreV1().Services(namespaceName).List(context.TODO(),metav1.ListOptions{FieldSelector: fieldSelector, LabelSelector: labelSelector})
 	if err != nil {
 		return serviceList,err
 	}

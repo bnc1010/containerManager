@@ -5,7 +5,6 @@ import (
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
-	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/bnc1010/containerManager/biz/pkg/k8s"
 	"github.com/bnc1010/containerManager/biz/pkg/postgres"
 	resp_utils "github.com/bnc1010/containerManager/biz/utils"
@@ -13,7 +12,8 @@ import (
 
 
 
-func RootPostTest(ctx context.Context, c *app.RequestContext) {
+func RootPermissionCheck(ctx context.Context, c *app.RequestContext) {
+	requestUserId := fmt.Sprintf("%v",ctx.Value("requestUserId"))
 	type Test struct {
 		A string `json:"a" vd:"$!='Hertz'"`
 	}
@@ -25,10 +25,9 @@ func RootPostTest(ctx context.Context, c *app.RequestContext) {
 	} else{
 		hlog.CtxErrorf(ctx, "[PostTest] Unmarshal failed, err: %v", err)
 	}
-	
-	c.JSON(200, utils.H{
-		"message": "pong",
-	})
+	res_data := make(map[string]string)
+	res_data["userId"] = requestUserId
+	resp_utils.ResponseOK(c, "ok", res_data)
 }
 
 func RootGetNamespaceList(ctx context.Context, c *app.RequestContext) {
@@ -112,7 +111,9 @@ func RootGetNode(ctx context.Context, c *app.RequestContext) {
 		resp_utils.ResponseErrorParameter(c)
 		return
 	}
+	fmt.Println(req)
 	nodeInfo, err := k8s.GetNode(req.Name)
+	
 	if err != nil {
 		resp_utils.ResponseError(c, "Get Node Error", err)
 		return

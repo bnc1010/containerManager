@@ -30,11 +30,14 @@ func customizedRegister(r *server.Hertz) {
 	r.POST("/admin/podMemory", handler.AdminPodHeapsterMemory)
 	r.POST("/admin/podCpu", handler.AdminPodHeapsterCpu)
 	r.POST("/admin/podLog", handler.AdminPodLog)
+	r.POST("/admin/podEvent", handler.AdminGetPodEvent)
+	r.POST("/admin/listDeployments", handler.AdminGetDeploymentList)
+	r.POST("/admin/getDeployment", handler.AdminGetDeployment)
+	r.POST("/admin/listServices", handler.AdminGetServiceList)
 	
-	
-	
+
 	// root 
-	r.POST("/root/postping", handler.RootPostTest)
+	r.POST("/root/checkPermission", handler.RootPermissionCheck)
 	// Namespace
 	r.POST("/root/getNamespace", handler.RootGetNamespace)
 	r.POST("/root/listNamespaces", handler.RootGetNamespaceList)
