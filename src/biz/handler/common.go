@@ -219,6 +219,12 @@ func CommonCreateProject(ctx context.Context, c *app.RequestContext) {
 	fmt.Println(resources)
 	project.FillResources(resources)
 	fmt.Println(project)
+	sta := postgres.ProjectAdd(&project)
+	if sta {
+		resp_utils.ResponseOK(c, responseMsg.Success, "")
+	} else {
+		resp_utils.ResponseErrorParameter(c, "Failed To Create The Project")
+	}
 }
 //curl -d '{"projectName":"testproject","describe":"something for describe","isPublic":true, "images":["thisisarandstrforidPOwjG"]}' -H "Content-Type:application/json" -H "AUTH_TOKEN:Aa2N9jIOFz4If8Qn/EPGAn2nTd4z0BkcM45E6YetcGI1x9NOgDkUQFftPcNaAI6R"  -X POST http://127.0.0.1:8888/common/createProject
 

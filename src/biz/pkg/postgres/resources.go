@@ -49,6 +49,28 @@ func ResourcesInfo(resourcesId string)	(*Resources, error) {
 	return resources, nil
 }
 
+func ResourcesList()	(*[]Resources, error) {
+	rows, err:= Client.Query("select * from tb_resources")
+	defer rows.Close()
+	if err!= nil{
+		resourcesErrorLoger(err)
+		return nil, err
+	}
+	var resourcesList [] Resources
+	var bvalue 			[]byte
+	for rows.Next() {
+		resources := Resources{}
+		err := rows.Scan(&resources.Id, &bvalue, &resources.IsPublic)
+		if err != nil {
+			resourcesErrorLoger(err)
+			continue
+		}
+		json.Unmarshal(bvalue, &resources.Value)
+		resourcesList = append(resourcesList, resources)
+	}
+	return &resourcesList, nil
+}
+
 func ResourcesForPublic() ([]*Resources, error)	{
 	rows, err:= Client.Query("select * from tb_resources where ispublic=true")
 	defer rows.Close()

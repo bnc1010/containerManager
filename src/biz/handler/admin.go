@@ -2,11 +2,13 @@ package handler
 
 import (
 	"fmt"
+	"time"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/bnc1010/containerManager/biz/pkg/k8s"
+	"github.com/bnc1010/containerManager/biz/pkg/postgres"
 	resp_utils "github.com/bnc1010/containerManager/biz/utils"
 )
 
@@ -193,8 +195,132 @@ func AdminGetServiceList(ctx context.Context, c *app.RequestContext) {
 	}
 	serviceList,err := k8s.GetServiceList(req.Name, req.FieldSelector, req.LabelSelector)
 	if err != nil {
-		resp_utils.ResponseError(c, "Get PodList Error", err)
+		resp_utils.ResponseError(c, "Get ServiceList Error", err)
 		return
 	}
 	resp_utils.ResponseOK(c, responseMsg.Success, serviceList)
 }
+
+func AdminGetImageList(ctx context.Context, c *app.RequestContext) {
+	images, err := postgres.ImageList()
+	if err != nil {
+		resp_utils.ResponseError(c, "Get ImageList Error", err)
+		return
+	}
+	resp_utils.ResponseOK(c, responseMsg.Success, images)
+}
+
+func AdminAddImage(ctx context.Context, c *app.RequestContext) {
+	requestUserId := fmt.Sprintf("%v",ctx.Value("requestUserId"))
+	var req ImageView
+	err := c.BindAndValidate(&req)
+	if err != nil {
+		hlog.CtxErrorf(ctx, "[PostTest] Unmarshal failed, err: %v", err)
+		resp_utils.ResponseErrorParameter(c)
+		return
+	}
+	nowTime := time.Now()
+	imageId := resp_utils.RandStringWithLengthN(36)
+	image := postgres.Image{Id:imageId, Name:req.Name, Describe:req.Describe, PullName:req.PullName, Creator:requestUserId, UseGPU:req.UseGPU, Usable:req.Usable, CreateTime:nowTime, UpdateTime:nowTime, Ports:[]interface{}{}}
+	
+	for _, port := range req.Ports {
+		image.Ports = append(image.Ports, port)
+	}
+	sta := postgres.ImageAdd(&image)
+	if sta {
+		resp_utils.ResponseOK(c, responseMsg.Success, "")
+	} else {
+		resp_utils.ResponseErrorParameter(c, "Failed To Add The Image")
+	}
+}
+
+func AdminDelImage(ctx context.Context, c *app.RequestContext) {
+	var req Id
+	err := c.BindAndValidate(&req)
+	if err != nil {
+		hlog.CtxErrorf(ctx, "[PostTest] Unmarshal failed, err: %v", err)
+		resp_utils.ResponseErrorParameter(c)
+		return
+	}
+	sta := postgres.ImageDel(req.Id)
+	if sta {
+		resp_utils.ResponseOK(c, responseMsg.Success, "")
+	} else {
+		resp_utils.ResponseErrorParameter(c, "Failed To Del The Image")
+	}
+}
+
+func AdminEditImage(ctx context.Context, c *app.RequestContext) {
+	var req ImageView
+	err := c.BindAndValidate(&req)
+	if err != nil {
+		hlog.CtxErrorf(ctx, "[PostTest] Unmarshal failed, err: %v", err)
+		resp_utils.ResponseErrorParameter(c)
+		return
+	}
+	nowTime := time.Now()
+	oldImage, err := postgres.ImageInfo(req.Id)
+	if err != nil {
+		resp_utils.ResponseErrorParameter(c, "Error Image Id")
+		return
+	}
+	oldImage.Name = req.Name
+	oldImage.Describe = req.Describe
+	oldImage.PullName = req.PullName
+	oldImage.UseGPU = req.UseGPU
+	oldImage.Usable = req.Usable
+	oldImage.UpdateTime = nowTime
+	oldImage.Ports = []interface{}{}
+	
+	for _, port := range req.Ports {
+		oldImage.Ports = append(oldImage.Ports, port)
+	}
+	sta := postgres.ImageUpdate(oldImage)
+	if sta {
+		resp_utils.ResponseOK(c, responseMsg.Success, "")
+	} else {
+		resp_utils.ResponseErrorParameter(c, "Failed To Add The Image")
+	}
+}
+
+func AdminGetFilesList(ctx context.Context, c *app.RequestContext) {
+	filesList, err := postgres.FilesList()
+	if err != nil {
+		resp_utils.ResponseError(c, "Get FilesList Error", err)
+		return
+	}
+	resp_utils.ResponseOK(c, responseMsg.Success, filesList)
+}
+
+func AdminGetProjectsList(ctx context.Context, c *app.RequestContext) {
+	filesList, err := postgres.ProjectList()
+	if err != nil {
+		resp_utils.ResponseError(c, "Get ProjectList Error", err)
+		return
+	}
+	resp_utils.ResponseOK(c, responseMsg.Success, filesList)
+}
+
+func AdminGetNodeTagsList(ctx context.Context, c *app.RequestContext) {
+	nodeTagsList, err := postgres.K8sNodeTagList()
+	if err != nil {
+		resp_utils.ResponseError(c, "Get ProjectList Error", err)
+		return
+	}
+	resp_utils.ResponseOK(c, responseMsg.Success, nodeTagsList)
+}
+
+func AdminGetResourcesList(ctx context.Context, c *app.RequestContext) {
+	resourcesList, err := postgres.ResourcesList()
+	if err != nil {
+		resp_utils.ResponseError(c, "Get ResourcesList Error", err)
+		return
+	}
+	resp_utils.ResponseOK(c, responseMsg.Success, resourcesList)
+}
+
+
+
+
+
+

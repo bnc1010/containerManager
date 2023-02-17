@@ -21,10 +21,29 @@ type Deployment struct {
 }
 
 type PodLog struct {		
-	Pod string 										`json:"pod,required"`
+	Pod 			string 							`json:"pod,required"`
 	Namespace string 							`json:"namespace,required"`
 	TailLines int64								`json:"lines,required"`
 	Container string							`json:"container,required"`
+}
+
+type Port struct {
+	Port			string								`json:"port"`
+	Protocol	string							`json:"protocol"`
+}
+
+type ImageView struct {
+	Id				string							`json:"id"`
+	Name			string							`json:"name,required"`
+	Ports			[]Port							`json:"ports"`
+	Usable		bool								`json:"usable,required"`
+	UseGPU		bool								`json:"usegpu,required"`
+	PullName	string 							`json:"pullName,required"`
+	Describe	string							`json:"describe"`
+}
+
+type Id struct {
+	Id				string							`json:"id,required"`
 }
 
 func (podlog * PodLog) VaildTailLines() bool {

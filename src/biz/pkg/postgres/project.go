@@ -58,6 +58,38 @@ func ProjectInfo(projectId string)	(*Project, error) {
 	return project, nil
 }
 
+func ProjectList()	(*[]Project, error) {
+	rows, err:= Client.Query("select * from tb_project")
+	defer rows.Close()
+	if err!= nil{
+		projectErrorLoger(err)
+		return nil, err
+	}
+	var projects  		[]Project
+	var bfiles 				[]byte
+	var bdatasets 		[]byte
+	var bimages 			[]byte
+	var bk8snodeTags 	[]byte
+	var bresources 		[]byte
+	for rows.Next() {
+		project := Project{}
+		err := rows.Scan(&project.Id, &project.Name, &project.Describe, &project.Owner, &project.CreateTime, &project.LastOpenTime, &project.IsPublic, &bfiles, &bdatasets, &bimages, &project.ForkFrom, &bk8snodeTags, &bresources, &project.Usable)
+		if err != nil {
+			projectErrorLoger(err)
+			return nil, err
+		}
+		json.Unmarshal(bfiles, 		&project.Files)
+		json.Unmarshal(bdatasets, 	&project.Datasets)
+		json.Unmarshal(bimages, 	&project.Images)
+		json.Unmarshal(bk8snodeTags,&project.K8sNodeTags)
+		json.Unmarshal(bresources, 	&project.Resources)
+		projects = append(projects, project)
+	}
+
+	return &projects, nil
+}
+
+
 func ProjectAdd(project *Project) bool {
 	stmt, err := Client.Prepare("insert into tb_project(id,name,describe,owner,createtime,lastopentime,ispublic,files,datasets,images,forkfrom,k8snodetags,resources) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)")
 	defer stmt.Close()

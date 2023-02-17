@@ -35,6 +35,26 @@ func K8sNodeTagInfo(k8sNodeTagId string)	(*K8sNodeTag, error) {
 	return k8sNodeTag, nil
 }
 
+func K8sNodeTagList()	(*[]K8sNodeTag, error) {
+	rows, err:= Client.Query("select * from tb_k8snodetag")
+	defer rows.Close()
+	if err!= nil{
+		k8sNodeTagErrorLoger(err)
+		return nil, err
+	}
+	var k8sNodeTags []K8sNodeTag
+	for rows.Next() {
+		k8sNodeTag := K8sNodeTag{}
+		err := rows.Scan(&k8sNodeTag.Id, &k8sNodeTag.Key, &k8sNodeTag.Value, &k8sNodeTag.IsPublic)
+		if err != nil {
+			k8sNodeTagErrorLoger(err)
+			continue
+		}
+		k8sNodeTags = append(k8sNodeTags, k8sNodeTag)
+	}
+	return &k8sNodeTags, nil
+}
+
 func K8sNodeTagForPublic() ([]*K8sNodeTag, error)	{
 	rows, err:= Client.Query("select * from tb_k8snodetag where ispublic=true")
 	defer rows.Close()

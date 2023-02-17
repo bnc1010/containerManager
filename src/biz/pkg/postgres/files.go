@@ -18,6 +18,26 @@ func FilesInfo(filesId string) (*Files, error) {
 	return files, nil
 }
 
+func FilesList() (*[]Files, error) {
+	rows, err:= Client.Query("select * from tb_files")
+	defer rows.Close()
+	if err!= nil{
+		filesErrorLoger(err)
+		return nil, err
+	}
+	var filesList []Files
+	for rows.Next() {
+		files := Files{}
+		err := rows.Scan(&files.Id, &files.Name, &files.Creator, &files.Path, &files.CreateTime, &files.UpdateTime, &files.Size)
+		if err != nil {
+			filesErrorLoger(err)
+			continue
+		}
+		filesList = append(filesList, files)
+	}
+	return &filesList, nil
+}
+
 func FilesAdd(files *Files) bool {
 	stmt, err := Client.Prepare("insert into tb_files(id,name,creator,path,createtime,updatetime,size) values($1,$2,$3,$4,$5,$6,$7)")
 	defer stmt.Close()
