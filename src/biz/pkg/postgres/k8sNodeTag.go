@@ -55,6 +55,37 @@ func K8sNodeTagList()	(*[]K8sNodeTag, error) {
 	return &k8sNodeTags, nil
 }
 
+func K8sNodeTagDel(tagId string) bool {
+	stmt, err := Client.Prepare("delete from tb_k8snodetag where id=$1")
+	defer stmt.Close()
+	if err != nil {
+		k8sNodeTagErrorLoger(err)
+		return false
+	}
+	_, err = stmt.Exec(tagId)
+	if err != nil {
+		k8sNodeTagErrorLoger(err)
+		return false
+	}
+	return true
+}
+
+func K8sNodeTagUpdate(tag *K8sNodeTag) bool {
+	stmt, err := Client.Prepare("update tb_k8snodetag set key=$1,value=$2,ispublic=$3 where id=$4")
+	defer stmt.Close()
+	if err != nil {
+		k8sNodeTagErrorLoger(err)
+		return false
+	}
+	_, err = stmt.Exec(tag.Key, tag.Value, tag.IsPublic, tag.Id)
+	if err != nil {
+		k8sNodeTagErrorLoger(err)
+		return false
+	}
+	return true
+}
+
+
 func K8sNodeTagForPublic() ([]*K8sNodeTag, error)	{
 	rows, err:= Client.Query("select * from tb_k8snodetag where ispublic=true")
 	defer rows.Close()

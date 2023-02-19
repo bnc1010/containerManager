@@ -46,6 +46,13 @@ type Id struct {
 	Id				string							`json:"id,required"`
 }
 
+type NodeTag struct {
+	Id				string							`json:"id"`
+	Key				string 							`json:"key,required"`
+	Value			string							`json:"value,required"`
+	IsPublic	bool								`json:"isPublic,required"`
+}
+
 func (podlog * PodLog) VaildTailLines() bool {
 	if podlog.TailLines > 0 && podlog.TailLines < 10000 && (podlog.TailLines % 50) == 0 {
 		return true

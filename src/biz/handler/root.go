@@ -130,6 +130,62 @@ func RootNodesMetrics(ctx context.Context, c *app.RequestContext) {
 	resp_utils.ResponseOK(c, responseMsg.Success, data)
 }
 
+func RootAddK8sNodeTag(ctx context.Context, c *app.RequestContext) {
+	var req NodeTag
+  err := c.BindAndValidate(&req)
+	if err != nil {
+		resp_utils.ResponseErrorParameter(c)
+		return 
+	}
+	nodeTagId := resp_utils.RandStringWithLengthN(36)
+	nodeTag := &postgres.K8sNodeTag{Id:nodeTagId, Key:req.Key , Value:req.Value, IsPublic:req.IsPublic}
+	sta := postgres.K8sNodeTagAdd(nodeTag)
+	if sta {
+		resp_utils.ResponseOK(c, responseMsg.Success, "")
+	} else {
+		resp_utils.ResponseErrorParameter(c, "Failed To Add New Tag")
+	}
+}
+
+func RootEditK8sNodeTag(ctx context.Context, c *app.RequestContext) {
+	var req NodeTag
+  err := c.BindAndValidate(&req)
+	if err != nil {
+		resp_utils.ResponseErrorParameter(c)
+		return 
+	}
+	oldTag, err := postgres.K8sNodeTagInfo(req.Id)
+	if err != nil {
+		resp_utils.ResponseErrorParameter(c, "Error Tag Id")
+		return
+	}
+	oldTag.Key			= req.Key
+	oldTag.Value		= req.Value
+	oldTag.IsPublic = req.IsPublic
+	sta := postgres.K8sNodeTagUpdate(oldTag)
+	if sta {
+		resp_utils.ResponseOK(c, responseMsg.Success, "")
+	} else {
+		resp_utils.ResponseErrorParameter(c, "Failed To Edit Tag")
+	}
+}
+
+func RootDelK8sNodeTag(ctx context.Context, c *app.RequestContext) {
+	var req Id
+	err := c.BindAndValidate(&req)
+	if err != nil {
+		hlog.CtxErrorf(ctx, "[PostTest] Unmarshal failed, err: %v", err)
+		resp_utils.ResponseErrorParameter(c)
+		return
+	}
+	sta := postgres.K8sNodeTagDel(req.Id)
+	if sta {
+		resp_utils.ResponseOK(c, responseMsg.Success, "")
+	} else {
+		resp_utils.ResponseErrorParameter(c, "Failed To Del The Tag")
+	}
+}
+
 func RootGetResourcesList(ctx context.Context, c *app.RequestContext) {
 	resourcesList, err := postgres.ResourcesListForRoot()
 	if err != nil {
@@ -145,7 +201,7 @@ func RootAddResources(ctx context.Context, c *app.RequestContext) {
 		IsPublic						bool						`json:"isPublic"`
 	}
 	var req Reqbody
-    err := c.BindAndValidate(&req)
+  err := c.BindAndValidate(&req)
 	if err != nil {
 		resp_utils.ResponseErrorParameter(c)
 		return 
