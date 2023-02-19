@@ -35,15 +35,25 @@ func customizedRegister(r *server.Hertz) {
 	r.POST("/admin/getDeployment", handler.AdminGetDeployment)
 	r.POST("/admin/listServices", handler.AdminGetServiceList)
 	r.POST("/admin/listImages", handler.AdminGetImageList)
+
+	r.POST("/admin/getFilesInfo", handler.AdminGetFilesInfo)
 	r.POST("/admin/listFiles", handler.AdminGetFilesList)
+	
+	r.POST("/admin/getProjectInfo", handler.AdminGetProjectInfo)
 	r.POST("/admin/listProjects", handler.AdminGetProjectsList)
 	r.POST("/admin/listNodeTags", handler.AdminGetNodeTagsList)
 	r.POST("/admin/listResources", handler.AdminGetResourcesList)
+	
+	r.POST("/admin/getImageInfo", handler.AdminGetImageInfo)
 	r.POST("/admin/addImage", handler.AdminAddImage)
 	r.POST("/admin/delImage", handler.AdminDelImage)
 	r.POST("/admin/editImage", handler.AdminEditImage)
 
 	
+	r.POST("/admin/getDatasetInfo", handler.AdminGetDatasetInfo)
+	r.POST("/admin/listDatasets", handler.AdminGetDatasetList)
+	
+
 	// root 
 	r.POST("/root/checkPermission", handler.RootPermissionCheck)
 	// Namespace

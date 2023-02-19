@@ -7,15 +7,35 @@ func DatasetInfo(datasetId string) (*Dataset, error) {
 		datasetErrorLoger(err)
 		return nil, err
 	}
-	var dataset * Dataset
+	dataset := Dataset{}
 	for rows.Next() {
-		err := rows.Scan(&dataset.Id, &dataset.Name, &dataset.Describe, &dataset.Creator, &dataset.Path, &dataset.CreateTime, &dataset.UpdateTime, &dataset.Size, &dataset.IsPublic)
+		err := rows.Scan(&dataset.Id, &dataset.Name, &dataset.Describe, &dataset.Creator, &dataset.CreateTime, &dataset.UpdateTime, &dataset.Path, &dataset.IsPublic, &dataset.Size)
 		if err != nil {
 			datasetErrorLoger(err)
 			return nil, err
 		}
 	}
-	return dataset, nil
+	return &dataset, nil
+}
+
+func DatasetList() (* []Dataset, error) {
+	rows, err:= Client.Query("select * from tb_dataset")
+	defer rows.Close()
+	if err!= nil{
+		datasetErrorLoger(err)
+		return nil, err
+	}
+	var datasets []Dataset
+	for rows.Next() {
+		dataset := Dataset{}
+		err := rows.Scan(&dataset.Id, &dataset.Name, &dataset.Describe, &dataset.Creator, &dataset.CreateTime, &dataset.UpdateTime, &dataset.Path, &dataset.IsPublic, &dataset.Size)
+		if err != nil {
+			datasetErrorLoger(err)
+			continue
+		}
+		datasets = append(datasets, dataset)
+	}
+	return &datasets, nil
 }
 
 func DatasetAdd(dataset * Dataset) bool {

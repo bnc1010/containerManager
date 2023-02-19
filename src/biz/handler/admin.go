@@ -201,6 +201,24 @@ func AdminGetServiceList(ctx context.Context, c *app.RequestContext) {
 	resp_utils.ResponseOK(c, responseMsg.Success, serviceList)
 }
 
+
+func AdminGetImageInfo(ctx context.Context, c *app.RequestContext) {
+	var req Id
+	err := c.BindAndValidate(&req)
+	if err != nil {
+		hlog.CtxErrorf(ctx, "[PostTest] Unmarshal failed, err: %v", err)
+		resp_utils.ResponseErrorParameter(c)
+		return
+	}
+	image, err := postgres.ImageInfo(req.Id)
+	if err != nil {
+		resp_utils.ResponseError(c, "Get ImageInfo Error", err)
+		return
+	}
+	resp_utils.ResponseOK(c, responseMsg.Success, image)
+}
+
+
 func AdminGetImageList(ctx context.Context, c *app.RequestContext) {
 	images, err := postgres.ImageList()
 	if err != nil {
@@ -283,6 +301,24 @@ func AdminEditImage(ctx context.Context, c *app.RequestContext) {
 	}
 }
 
+
+func AdminGetFilesInfo(ctx context.Context, c *app.RequestContext) {
+	var req Id
+	err := c.BindAndValidate(&req)
+	if err != nil {
+		hlog.CtxErrorf(ctx, "[PostTest] Unmarshal failed, err: %v", err)
+		resp_utils.ResponseErrorParameter(c)
+		return
+	}
+	files, err := postgres.FilesInfo(req.Id)
+	if err != nil {
+		resp_utils.ResponseError(c, "Get FileInfo Error", err)
+		return
+	}
+	resp_utils.ResponseOK(c, responseMsg.Success, files)
+}
+
+
 func AdminGetFilesList(ctx context.Context, c *app.RequestContext) {
 	filesList, err := postgres.FilesList()
 	if err != nil {
@@ -290,6 +326,47 @@ func AdminGetFilesList(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	resp_utils.ResponseOK(c, responseMsg.Success, filesList)
+}
+
+func AdminGetDatasetInfo(ctx context.Context, c *app.RequestContext) {
+	var req Id
+	err := c.BindAndValidate(&req)
+	if err != nil {
+		hlog.CtxErrorf(ctx, "[PostTest] Unmarshal failed, err: %v", err)
+		resp_utils.ResponseErrorParameter(c)
+		return
+	}
+	dataset, err := postgres.DatasetInfo(req.Id)
+	if err != nil {
+		resp_utils.ResponseError(c, "Get DatasetInfo Error", err)
+		return
+	}
+	resp_utils.ResponseOK(c, responseMsg.Success, dataset)
+}
+
+func AdminGetDatasetList(ctx context.Context, c *app.RequestContext) {
+	datasetList, err := postgres.DatasetList()
+	if err != nil {
+		resp_utils.ResponseError(c, "Get DatasetList Error", err)
+		return
+	}
+	resp_utils.ResponseOK(c, responseMsg.Success, datasetList)
+}
+
+func AdminGetProjectInfo(ctx context.Context, c *app.RequestContext) {
+	var req Id
+	err := c.BindAndValidate(&req)
+	if err != nil {
+		hlog.CtxErrorf(ctx, "[PostTest] Unmarshal failed, err: %v", err)
+		resp_utils.ResponseErrorParameter(c)
+		return
+	}
+	project, err := postgres.ProjectInfo(req.Id)
+	if err != nil {
+		resp_utils.ResponseError(c, "Get ProjectInfo Error", err)
+		return
+	}
+	resp_utils.ResponseOK(c, responseMsg.Success, project)
 }
 
 func AdminGetProjectsList(ctx context.Context, c *app.RequestContext) {

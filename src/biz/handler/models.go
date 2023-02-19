@@ -28,7 +28,7 @@ type PodLog struct {
 }
 
 type Port struct {
-	Port			string								`json:"port"`
+	Port			int64								`json:"port"`
 	Protocol	string							`json:"protocol"`
 }
 

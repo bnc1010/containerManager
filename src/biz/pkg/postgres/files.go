@@ -7,7 +7,7 @@ func FilesInfo(filesId string) (*Files, error) {
 		filesErrorLoger(err)
 		return nil, err
 	}
-	var files * Files
+	files := Files{}
 	for rows.Next() {
 		err := rows.Scan(&files.Id, &files.Name, &files.Creator, &files.Path, &files.CreateTime, &files.UpdateTime, &files.Size)
 		if err != nil {
@@ -15,7 +15,7 @@ func FilesInfo(filesId string) (*Files, error) {
 			return nil, err
 		}
 	}
-	return files, nil
+	return &files, nil
 }
 
 func FilesList() (*[]Files, error) {
