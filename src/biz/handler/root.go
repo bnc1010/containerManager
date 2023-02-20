@@ -197,8 +197,8 @@ func RootGetResourcesList(ctx context.Context, c *app.RequestContext) {
 
 func RootAddResources(ctx context.Context, c *app.RequestContext) {
 	type Reqbody struct {
-		Value							map[string]interface{}		`json:"value"`
-		IsPublic						bool						`json:"isPublic"`
+		Value							map[string]interface{}		`json:"value,required"`
+		IsPublic						bool										`json:"isPublic,required"`
 	}
 	var req Reqbody
   err := c.BindAndValidate(&req)
@@ -237,11 +237,17 @@ func RootEditResources(ctx context.Context, c *app.RequestContext) {
 	resp_utils.ResponseOK(c, responseMsg.Success, nil)
 }
 
-// func RootDeleteResources(ctx context.Context, c *app.RequestContext) {
-// 	resourcesList, err := postgres.ResourcesListForRoot
-// 	if err != nil {
-// 		resp_utils.ResponseError(c, "Get ResourcesList error:", err)
-// 		return
-// 	}
-// 	resp_utils.ResponseOK(c, responseMsg.Success, resourcesList)
-// }
+func RootDelResources(ctx context.Context, c *app.RequestContext) {
+	var req Id
+	err := c.BindAndValidate(&req)
+	if err != nil {
+		resp_utils.ResponseError(c, "Get ResourcesList error:", err)
+		return
+	}
+	sta := postgres.ResourcesDel(req.Id)
+	if sta {
+		resp_utils.ResponseOK(c, responseMsg.Success, "")
+	} else {
+		resp_utils.ResponseErrorParameter(c, "Failed To Del The Resources")
+	}
+}

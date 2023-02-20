@@ -13,7 +13,7 @@ func (resources * Resources) Default() {
 
 
 func ResourcesAdd(resources * Resources) bool {
-	stmt, err := Client.Prepare("insert into tb_resource(id,value,ispublic) values($1,$2,$3)")
+	stmt, err := Client.Prepare("insert into tb_resources(id,value,ispublic) values($1,$2,$3)")
 	defer stmt.Close()
 	if err != nil {
 		resourcesErrorLoger(err)
@@ -126,6 +126,22 @@ func ResourcesUpdate(resources * Resources) bool {
 	}
 	value_json, _ 	:= utils.Map2Bytes(resources.Value)
 	_, err = stmt.Exec(value_json, resources.IsPublic, resources.Id)
+	if err != nil {
+		resourcesErrorLoger(err)
+		return false
+	}
+	return true
+}
+
+
+func ResourcesDel(tagId string) bool {
+	stmt, err := Client.Prepare("delete from tb_resources where id=$1")
+	defer stmt.Close()
+	if err != nil {
+		resourcesErrorLoger(err)
+		return false
+	}
+	_, err = stmt.Exec(tagId)
 	if err != nil {
 		resourcesErrorLoger(err)
 		return false

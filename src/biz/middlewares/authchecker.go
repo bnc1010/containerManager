@@ -138,8 +138,7 @@ func AuthChecker() app.HandlerFunc {
 
 		// 传递当前访问用户的id给业务handler   使用ctx.Value("requestUserId")获取该值
 		ctx = context.WithValue(ctx, "requestUserId", token.UserId)
-		
-		
+		ctx = context.WithValue(ctx, "requestUserRole", token.Role)
 		c.Next(ctx)
 	}
   }

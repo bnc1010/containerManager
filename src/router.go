@@ -69,5 +69,12 @@ func customizedRegister(r *server.Hertz) {
 	r.POST("/root/addNodeTag", handler.RootAddK8sNodeTag)
 	r.POST("/root/delNodeTag", handler.RootDelK8sNodeTag)
 	r.POST("/root/editNodeTag", handler.RootEditK8sNodeTag)
+
+	r.POST("/root/editResources", handler.RootEditResources)
+	r.POST("/root/addResources", handler.RootAddResources)
+	r.POST("/root/delResources", handler.RootDelResources)
+
+	
+	
 	
 }

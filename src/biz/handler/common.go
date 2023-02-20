@@ -31,11 +31,10 @@ func CommonPostTest(ctx context.Context, c *app.RequestContext) {
 	})
 }
 
-
-
 func CommonOpenProject(ctx context.Context, c *app.RequestContext) {
+	requestUserId := ctx.Value("requestUserId")
+	requestUserRole := ctx.Value("requestUserRole")
 	type Reqbody struct {
-		UserId 					string `json:"userId,required"`
 		ProjectId				string `json:"projectId,required"`
 		ImageId					string `json:"imageId,required"`
 	}
@@ -51,7 +50,7 @@ func CommonOpenProject(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	// 检查project是否是当前用户的
-	if project.Owner != req.UserId {
+	if requestUserRole != "admin" && requestUserRole != "root" && project.Owner != requestUserId {
 		resp_utils.ResponseForbid(c, fmt.Sprintf("have no perimission of the project"))
 		return 
 	}
@@ -82,13 +81,11 @@ func CommonOpenProject(ctx context.Context, c *app.RequestContext) {
 		resp_utils.ResponseErrorParameter(c, "no usable image")
 		return
 	}
-
-
 	//
 	// todo: 动态配置的namespace，以及deploymentName怎么给，每个用户最多同时可以开多少个
 	//
-	namespace			:= "default"
-	deploymentName		:= req.UserId + "-1"
+	namespace				:= "default"
+	deploymentName	:= project.Owner + "-1"
 	serviceName			:= "service-" + deploymentName
 
 	// 尝试创建deployment
