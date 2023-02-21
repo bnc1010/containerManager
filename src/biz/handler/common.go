@@ -3,6 +3,8 @@ package handler
 import (
 	"fmt"
 	"time"
+	"regexp"
+	"strings"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/utils"
@@ -11,6 +13,11 @@ import (
 	"github.com/bnc1010/containerManager/biz/pkg/k8s"
 	"github.com/bnc1010/containerManager/biz/pkg/filecontrol"
 	resp_utils "github.com/bnc1010/containerManager/biz/utils"
+)
+
+var (
+	regestr = `token=[0-9a-z]{48}`
+	reg = regexp.MustCompile(regestr)
 )
 
 func CommonPostTest(ctx context.Context, c *app.RequestContext) {
@@ -39,69 +46,139 @@ func CommonOpenProject(ctx context.Context, c *app.RequestContext) {
 		ImageId					string `json:"imageId,required"`
 	}
 	var req Reqbody
-    err := c.BindAndValidate(&req)
+  err := c.BindAndValidate(&req)
 	if err != nil {
 		resp_utils.ResponseErrorParameter(c)
 		return 
 	}
+
 	project, err := postgres.ProjectInfo(req.ProjectId)
 	if err != nil {
 		resp_utils.ResponseErrorParameter(c)
 		return
 	}
 	// 检查project是否是当前用户的
-	if requestUserRole != "admin" && requestUserRole != "root" && project.Owner != requestUserId {
+	if !IsAdminOrRoot(requestUserRole) && project.Owner != requestUserId {
 		resp_utils.ResponseForbid(c, fmt.Sprintf("have no perimission of the project"))
 		return 
 	}
-	// 检查image是否是该project拥有的
-	imageOK := false
-	if len(req.ImageId) != 0 {
-		for _, _image := range project.Images {
-			if _image == req.ImageId {
-				imageOK = true
-				break
-			}
-		}
-	}
-	var image * postgres.Image
-	if imageOK {
-		image, err = postgres.ImageInfo(req.ImageId)
-		fmt.Println(image)
-		if err != nil || image == nil {
-			imageOK = false
-		}
-		// image合法但是被设置禁用
-		if !image.Usable {
-			resp_utils.ResponseErrorParameter(c, "chosen image is be set to unusable")
-			return
-		}
-	}
-	if !imageOK {
-		resp_utils.ResponseErrorParameter(c, "no usable image")
-		return
-	}
+
 	//
 	// todo: 动态配置的namespace，以及deploymentName怎么给，每个用户最多同时可以开多少个
 	//
 	namespace				:= "default"
-	deploymentName	:= project.Owner + "-1"
+	deploymentName	:= project.Owner + "-" + strings.ToLower(req.ProjectId)
 	serviceName			:= "service-" + deploymentName
+
+	// 如果已经存在对应dployment，直接返回信息
+	isExist := CheckDeploymentExist(namespace, deploymentName)
+	if isExist {
+		resp_utils.ResponseOK(c, responseMsg.Success, deploymentName)
+		return
+	}
+
+	// 检查image是否是该project拥有的
+	imageSta, image := CheckImageBelongProject(req.ImageId, project)
+	if !imageSta {
+		resp_utils.ResponseErrorParameter(c, "image illegal")
+		return
+	}
 
 	// 尝试创建deployment
 	_, err = k8s.CreateSimpleDeployment(namespace, deploymentName, image.PullName, image.Ports, 1, project.K8sNodeTags, project.Resources)
 	if err != nil {
 		resp_utils.ResponseError(c, "some thing error when open the deployment", err)
+		return
 	}
 	_, err = k8s.CreateService(namespace, serviceName, map[string]string {"app": deploymentName}, image.Ports)
 	if err != nil {
 		resp_utils.ResponseError(c, "some thing error when create the service", err)
 		k8s.DeleteDeployment(namespace, deploymentName)
+		return 
 	}
 	resp_utils.ResponseOK(c, responseMsg.Success, deploymentName)
 }
-//curl -d '{"userId":"423h4huhuhfuseu34", "projectId":"thisisarandstrforidqQgmb", "imageId":"thisisarandstrforidPOwjG"}' -H "Content-Type:application/json" -H "AUTH_TOKEN:Aa2N9jIOFz4If8Qn/EPGAn2nTd4z0BkcM45E6YetcGI1x9NOgDkUQFftPcNaAI6R "  -X POST http://127.0.0.1:8888/common/openProject
+//curl -d '{"userId":"423h4huhuhfuseu34", "projectId":"thisisarandstrforidqQgma", "imageId":"thisisarandstrforidPOwjG"}' -H "Content-Type:application/json" -H "AUTH_TOKEN:Aa2N9jIOFz4If8Qn/EPGAn2nTd4z0BkcM45E6YetcGI1x9NOgDkUQFftPcNaAI6R "  -X POST http://127.0.0.1:8888/common/openProject
 
+func CommonGetProjectUrl(ctx context.Context, c *app.RequestContext){
+	requestUserId := ctx.Value("requestUserId")
+	requestUserRole := ctx.Value("requestUserRole")
+	type Reqbody struct {
+		Deployment				string `json:"deployment,required"`
+	}
+	req := Reqbody{}
+	err := c.BindAndValidate(&req)
+	if err != nil {
+		resp_utils.ResponseErrorParameter(c)
+		return 
+	}
+
+	//检查deployment的拥有者是否是当前用户
+	if requestUserId != strings.Split(req.Deployment, "-")[0] && !IsAdminOrRoot(requestUserRole) {
+		resp_utils.ResponseForbid(c, fmt.Sprintf("have no perimission of the project"))
+		return 
+	}
+
+	namespace := "default"
+	isExist := CheckDeploymentExist(namespace, req.Deployment)
+	if ! isExist {
+		resp_utils.ResponseOK(c, responseMsg.Success, "not exist")
+		return
+	}
+	base_url := "http://139.224.216.129:"
+	access_url := base_url
+	service, err := k8s.GetService(namespace, "service-" + req.Deployment)
+
+	ports := service.Spec.Ports
+	for _, _port := range ports {
+		if _port.NodePort > 0{
+			access_url = access_url + fmt.Sprintf("%d", _port.NodePort)
+			break
+		}
+	}
+	logs, err := k8s.GetPodsLogOfDeployment(namespace, req.Deployment)
+	token := ""
+	for _, _v := range(logs) {
+		resdata := reg.FindAllStringSubmatch(_v,-1)
+		if len(resdata) > 0 {
+			token = resdata[len(resdata)-1][0][6:]
+			break
+		}
+	}
+	type Resbody struct {
+		Url			string
+		Token		string
+	}
+	if len(token) == 0{
+		resp_utils.ResponseOK(c, responseMsg.Success, "not ready")
+		return
+	}
+	resp_utils.ResponseOK(c, responseMsg.Success, Resbody{access_url, token})
+}
+
+func CommonCloseProject(ctx context.Context, c *app.RequestContext) {
+	requestUserId := ctx.Value("requestUserId")
+	requestUserRole := ctx.Value("requestUserRole")
+	type Reqbody struct {
+		Deployment				string `json:"deployment,required"`
+	}
+	req := Reqbody{}
+	err := c.BindAndValidate(&req)
+	if err != nil {
+		resp_utils.ResponseErrorParameter(c)
+		return 
+	}
+	//检查deployment的拥有者是否是当前用户
+	if requestUserId != strings.Split(req.Deployment, "-")[0] && !IsAdminOrRoot(requestUserRole) {
+		resp_utils.ResponseForbid(c, fmt.Sprintf("have no perimission of the project"))
+		return 
+	}
+	namespace := "default"
+	
+	k8s.DeleteDeployment(namespace, req.Deployment)
+	k8s.DeleteService(namespace, "service-" + req.Deployment)
+	resp_utils.ResponseOK(c, responseMsg.Success, "success")
+}
 
 func CommonProjectInfo(ctx context.Context, c *app.RequestContext) {
 	type Reqbody struct {
